@@ -640,6 +640,7 @@
 /* The actual product area */
 #recommendations-content {
     width: 90%;
+      position: relative;
     max-width: 1200px;
     max-height: 85vh;
 
@@ -1199,6 +1200,50 @@
             color: #6c757d;
             z-index: 5;
         }
+
+
+#loadingScreen {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+ transform: translate(-50%, -50%);  
+   
+    width: 400px;
+    height: 300px;
+
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    background: rgba(255, 255, 255);
+
+    z-index: 999999;
+}
+
+.loader {
+    width: 50px;
+    height: 50px;
+
+    border: 5px solid #ddd;
+    border-top: 5px solid #333;
+
+    border-radius: 50%;
+
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+    margin-top: 15px;
+    font-size: 18px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
         .password-toggle-icon:hover {
             color: #333;
@@ -2010,10 +2055,14 @@
     <!-- Recommendations Modal -->
     <div id="recommendationsModal">
         <button id="closeRecommendations">X</button>
+        
     <div id="recommendations-content"></div>
     <button>Ai recomendation</button>   
 </div>
-
+  <div id="loadingScreen">
+        <div class="loader"></div>
+        <p>Finding products...</p>
+    </div>
     <!-- ===== ADDED: AI Comparison Modal ===== -->
     <div id="comparisonModal" class="comparison-modal">
         <div class="comparison-content">
@@ -2353,7 +2402,15 @@
         const expertsGrid = document.getElementById('expertsGrid');
         const uneed = document.getElementById("heroSubcategory");
         const heroSubmitBtn = document.getElementById('heroSubmitBtn');
-       heroSubmitBtn.addEventListener('click', async () => {
+        
+     
+const recommendationsContent =
+    document.querySelector("#recommendations-content");
+
+const loadingScreen =
+    document.querySelector("#loadingScreen");
+
+heroSubmitBtn.addEventListener('click', async () => {
 
     const budget = heroBudgetRange.value;
     const category = heroCategory.value;
@@ -2363,6 +2420,15 @@
         alert("Please select a category.");
         return;
     }
+
+    // OPEN MODAL FIRST
+    
+
+    // SHOW LOADING
+    loadingScreen.style.display = "flex";
+
+    // Give browser time to render loading screen
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     const response = await fetch("/product", {
         method: "POST",
@@ -2379,14 +2445,17 @@
 
     console.log(data);
 
-    // Container where products will appear
-    const recommendationsContent =
-        document.querySelector("#recommendations-content");
+    // HIDE LOADING
+    loadingScreen.style.display = "none";
 
-    // Clear previous results
     recommendationsContent.innerHTML = "";
 
-    // Create a card for every scraped product
+    if (!data.products || data.products.length === 0) {
+        recommendationsContent.innerHTML =
+            "<p>No products found.</p>";
+        return;
+    }
+
     data.products.forEach(product => {
 
         const card = document.createElement("div");
@@ -2405,7 +2474,7 @@
             <h4>${product.price}</h4>
 
             <ul>
-                ${product.specs
+                ${(product.specs || [])
                     .map(spec => `<li>${spec}</li>`)
                     .join("")}
             </ul>
@@ -2413,9 +2482,9 @@
 
         recommendationsContent.appendChild(card);
     });
-
-    recommendationsModal.style.display = 'block';
+    recommendationsModal.style.display = "block";
 });
+
         // Close modal
         document.querySelectorAll('.close-modal').forEach(btn => {
             btn.addEventListener('click', (e) => {
