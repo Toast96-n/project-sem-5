@@ -2,13 +2,15 @@ import express from 'express'
 import bcrypt, { hash } from 'bcrypt';
 import session from 'express-session';
 import mongoose from 'mongoose';
-import { signupSchema } from './model.js';
-import { scrap } from "./ai.js";
-
+import { signupSchema } from './models.js';
+import { scrap } from "./test_scraper_amazon.js";
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import { hashpasstoken } from './models.js';
 
 let connect = await mongoose.connect('mongodb://localhost:27017/ProductSuggestion')
 const app = express();
-const port = 3000;
+const port = 4005;
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
@@ -24,7 +26,9 @@ app.use(session({
 }))
 
 app.get('/', (req,res)=>{
-    res.sendFile('C:/Users/dhru_/Desktop/project sem 5/landingpage.html');
+
+
+     res.sendFile('C:/Users/dhru_/Desktop/project sem 5/landingpage.html');
 });
 
 
@@ -132,6 +136,85 @@ app.post('/login', async (req, res) => {
         });
     }
 });
+
+        app.post('/forget',async(req,res)=>{
+            try{
+                const {email} = req.body;
+                const token = await crypto.randomBytes(32).toString('hex');
+            let hashtoken = await crypto.createHash('sha256').update(token).digest('hex');
+        
+            console.log(token)
+            const transport = nodemailer.createTransport({
+                host:'smtp.gmail.com',
+                secure:true,
+                port:465,
+                auth:{
+                    user:'ps9023079938@gmail.com',
+                    pass:'cbom qqvy txey wtjw'
+                }
+            })
+        
+            let to=email;
+            let sub = 'Your Reset password Request'
+            let msg = `
+            <p>The Email is Send Sucessfully</p>
+                <a href='http://localhost:${port}/reset-password?token=${token}'>Reset Password</a>
+            `;
+        
+               function sendMail(to,sub,msg){
+                transport.sendMail({
+                    to,
+                    subject:sub,
+                    html:msg
+                })
+           }
+        
+           sendMail(to,sub,msg);
+           console.log(req.body.email);
+           let findemail = await signupSchema.findOne({email:email})
+        
+           if(!findemail){
+            console.log({errormsg:"The User is not Register"});
+            res.json(findemail);
+           }else{
+                const tokensave = new hashpasstoken({
+                userId:findemail._id,
+                hashToken:hashtoken,
+                exprireAt: new Date(Date.now() + 10 * 60 * 1000)
+            });
+        
+            let save = await tokensave.save();
+             if(save){
+                console.log({message:"the Token is Sucessully Send In Email"});
+                res.json({message:"Email is Sucessfully Send"});
+            }
+        }
+            }catch(err){
+                console.log(err.message)
+            }
+})
+
+app.get('/reset-password',async(req,res)=>{
+    let token = req.query.token
+    console.log(token);
+    let hashtokens = crypto.createHash('sha256').update(token).digest('hex');
+    let findhash = await hashpasstoken.findOne({hashToken:hashtokens});
+    if(findhash){
+        console.log({heshtoken : hashtokens});
+    }if(findhash.exprireAt < new Date()){
+        res.status(400).send("The Token is Expired");
+    }if(findhash && findhash.exprireAt > new Date()){
+        console.log({message:"The Token is Verified"});
+        res.redirect('/updatepass');
+    }else{
+        res.status(401).send({error:"The Token is invalid and Expired"});
+    }
+
+})
+
+app.get('/updatepass',(req,res)=>{
+   res.send(`<script> alert("the request is send sucessfully");</script>`)
+})
 
 
 app.post("/product",async (req,res)=>{
