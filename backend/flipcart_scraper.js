@@ -86,6 +86,7 @@ async function scrap(search) {
                     .allTextContents(),
 
                 product
+                    
                     .locator(".hZ3P6w")
                     .first()
                     .textContent()
@@ -140,7 +141,8 @@ async function scrap(search) {
 
         const prompt = `
 You are a product comparison expert.
-
+also consider that data can be another product and not only mobile phones. do consider that the products can be from different categories and not only mobile phones.and give your comparison based on the specifications of the products and not on the brand name or popularity of the product.
+also compare the products based on the specifications and not on the brand name or popularity of the product.
 Compare the following products and select the best two.
 
 Consider:
@@ -159,6 +161,8 @@ IMPORTANT:
 - Prefer products with better specifications for their price.
 - Return the product using its exact name from the data.
 - The "id" identifies each product.
+-if present give detailed reasons for your selection of the best two products.
+- if present give your view for gaming and camera performance of the products.
 
 Products:
 

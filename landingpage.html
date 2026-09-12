@@ -623,54 +623,90 @@
             color: #333;
         }
 
-    /* Dark background behind the modal */
+    /* ===================== PRODUCT RECOMMENDATIONS MODAL ===================== */
 #recommendationsModal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    width:1260px;
-    height:880px;
-
-
-    padding: 40px;
-    box-sizing: border-box;
+    display:none; position:fixed; inset:0; z-index:1900; width:100%; height:100%;
+    padding:0px; background:rgba(9, 10, 12, 0.065);
+    backdrop-filter:blur(8px);  overflow-y:auto;
 }
-
-/* The actual product area */
 #recommendations-content {
-    width: 90%;
-      position: relative;
-    max-width: 1200px;
-    max-height: 90vh;
+    position: relative !important;
 
-    margin: 30px auto;
+    width: min(1180px, 100%);
+    max-height: calc(100vh - 150px);
 
-    background: white;
-    border-radius: 16px;
+    margin: 70px auto 25px;
+    padding: 70px 30px 20px;
 
-    padding: 25px;
+    background: #f8f9fd;
+    border-radius: 6px;
 
+    box-shadow: 0 30px 90px rgba(0, 0, 0, .30);
+
+    box-sizing: border-box;
     overflow-y: auto;
 
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 18px;
-
-    box-sizing: border-box;
 }
 
+#recommendationsActions {
+    width:min(1180px,100%); margin:0 auto; display:flex; justify-content:flex-end; gap:12px;
+}
+#compareProductsBtn {
+    border:0; border-radius:12px; padding:13px 20px;
+    background:linear-gradient(135deg,#536dfe,#6c3df5); color:#fff;
+    font-family:'Poppins',sans-serif; font-weight:700; font-size:14px; cursor:pointer;
+    box-shadow:0 10px 24px rgba(83,109,254,.30); transition:.2s ease;
+}
+#compareProductsBtn:hover { transform:translateY(-2px); box-shadow:0 14px 30px rgba(83,109,254,.38); }
+ #closeRecommendations {
+    position: absolute !important;
+
+    top: 75px !important;
+    right: 100px !important;
+
+    left: auto !important;
+    bottom: auto !important;
+
+    
+    width: 35px !important;
+    height: 35px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    border: none !important;
+    
+
+    
+    color: #000000;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    cursor: pointer;
+      background: none;
+    z-index: 9999;
+}
 
 /* Product card */
 .recommendation-card {
+    position:relative;
+    transition:transform .2s ease, box-shadow .2s ease;
     background: white;
-
+    overflow-y: auto;
     border: 1px solid #e5e5e5;
     border-radius: 12px;
-
+    scrollbar-width: none;
     padding: 12px;
-    width: 300px;
-    height: 450px;
+    width: 250px;
+    height: 470px;
 
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 
@@ -679,6 +715,8 @@
 
 
 /* Product image */
+.recommendation-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(20,32,70,.12)}
+
 .recommendation-card img {
     width: 100%;
     height: 150px;
@@ -1203,49 +1241,24 @@
 
 
 #loadingScreen {
-    position: fixed;
-    top: 50%;
-    left: 50%;
- transform: translate(-50%, -50%);  
-   
-    width: 400px;
-    height: 300px;
-
-
-    display: none;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-
-    background: rgba(255, 255, 255);
-
-    z-index: 999999;
+    display:none; position:fixed; inset:0; width:100%; height:100%;
+    align-items:center; justify-content:center; z-index:2000;
+    background:rgba(20,28,50,.30);
 }
-
-.loader {
-    width: 50px;
-    height: 50px;
-
-    border: 5px solid #ddd;
-    border-top: 5px solid #333;
-
-    border-radius: 50%;
-
-    animation: spin 0.8s linear infinite;
+.loading-card {
+    width:min(360px,calc(100vw - 40px)); padding:28px 24px; border-radius:14px;
+    text-align:center; background:#fff; color:#333; box-shadow:0 10px 35px rgba(0,0,0,.16);
 }
-
-.loading-text {
-    margin-top: 15px;
-    font-size: 18px;
+.loading-spinner {
+    width:38px; height:38px; margin:0 auto 14px;
+    border:4px solid #e2e5ee; border-top-color:#4361ee; border-radius:50%;
+    animation:simpleSpin .8s linear infinite;
 }
+.loading-card h3 { margin:0 0 6px; font-size:18px; font-weight:600; }
+.loading-card p { margin:0; color:#777; font-size:13px; }
+@keyframes simpleSpin { to { transform:rotate(360deg); } }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-        .password-toggle-icon:hover {
+.password-toggle-icon:hover {
             color: #333;
         }
 
@@ -1334,25 +1347,7 @@
             transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
             z-index: 9999;
         }
-        #closeRecommendations{
-    display: block;
-    position: relative; 
-    left:1066px;
-    top:70px;
-        margin-right: 0;
-    width: 40px;
-    height: 30px;
-    background-color: white;
-    font-weight: bold;
-    border: none;
-    font-size: 12px;
-
-    background: rgba(252, 252, 252);
-
-    z-index: 1000;
-
-    
-}
+     
 
         .hero-profile-menu.active {
             opacity: 1;
@@ -1622,162 +1617,36 @@
             background: linear-gradient(90deg, #4258d6 0%, #4760e4 100%);
         }
 
-        /* ===== ADDED: AI Comparison Modal ===== */
+        /* ===== AI Comparison Modal ===== */
         .comparison-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.55);
-            z-index: 1003;
-            overflow-y: auto;
+            display:none; position:fixed; inset:0; width:100%; height:100%; padding:20px;
+            background:rgba(20,28,50,.30); z-index:3000; overflow-y:auto;
         }
-
         .comparison-content {
-            background-color: #ffffff;
-            margin: 3% auto;
-            padding: 30px;
-            border-radius: 16px;
-            width: 92%;
-            max-width: 950px;
-            position: relative;
+            background:#fff; margin:40px auto; padding:24px; border-radius:14px;
+            width:min(950px,100%); position:relative; box-shadow:0 12px 40px rgba(0,0,0,.18);
         }
+        .comparison-header h2 { font-size:1.5rem; color:#171c26; display:flex; align-items:center; gap:10px; }
+        .comparison-header h2 i { color:var(--hero-blue); }
+        .comparison-subtitle { color:#666; margin:8px 0 24px; font-size:.95rem; }
+        .comparison-products-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .comparison-card { border:1px solid #eee; border-radius:12px; padding:18px; background:#f8f9fa; }
+        .comparison-card-image { width:100%; height:150px; border-radius:10px; background:#e7e9f5; display:flex; align-items:center; justify-content:center; color:#9aa4c7; font-size:2rem; margin-bottom:14px; overflow:hidden; }
+        .comparison-card-image img { width:100%; height:100%; object-fit:contain; }
+        .comparison-card h3 { font-size:1.05rem; color:#171c26; margin-bottom:6px; }
+        .comparison-card .comparison-price { color:var(--hero-blue); font-weight:800; font-size:1.15rem; margin-bottom:8px; }
+        .comparison-feature-list { font-size:.85rem; color:#444; margin-bottom:12px; padding-left:18px; }
+        .comparison-feature-list li { margin-bottom:4px; }
+        .comparison-reason { margin-top:12px; padding:12px; background:#eef1ff; border-radius:8px; font-size:.84rem; color:#444; }
+        .comparison-verdict { margin-top:20px; padding:16px 18px; background:#eef1ff; border-left:4px solid var(--hero-blue); border-radius:0 8px 8px 0; }
+        .comparison-verdict h4 { color:var(--hero-blue); margin-bottom:6px; font-size:1rem; display:flex; align-items:center; gap:8px; }
+        .comparison-verdict p { color:#444; font-size:.9rem; margin:0; }
+        .comparison-best-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; margin-bottom:10px; border-radius:999px; background:#eef1ff; color:#536dfe; font-size:11px; font-weight:700; }
+        .comparison-product-link { display:inline-block; margin-top:12px; color:var(--hero-blue); font-weight:600; text-decoration:none; }
+        .close-modal { position:absolute; top:12px; right:16px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:24px; color:#555; }
+        @media (max-width:700px) { .comparison-products-grid{grid-template-columns:1fr;} .comparison-content{margin:20px auto; padding:18px;} }
 
-        .comparison-header h2 {
-            font-size: 1.7rem;
-            color: #171c26;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .comparison-header h2 i {
-            color: var(--hero-blue);
-        }
-
-        .comparison-subtitle {
-            color: #666;
-            margin: 8px 0 24px;
-            font-size: 0.95rem;
-        }
-
-        .comparison-products-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .comparison-card {
-            border: 1px solid #eee;
-            border-radius: 14px;
-            padding: 20px;
-            background: #f8f9fa;
-        }
-
-        .comparison-card-image {
-            width: 100%;
-            height: 120px;
-            border-radius: 10px;
-            background: #e7e9f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #9aa4c7;
-            font-size: 2rem;
-            margin-bottom: 14px;
-        }
-
-        .comparison-card h3 {
-            font-size: 1.1rem;
-            color: #171c26;
-            margin-bottom: 6px;
-        }
-
-        .comparison-card .comparison-price {
-            color: var(--hero-blue);
-            font-weight: 800;
-            font-size: 1.2rem;
-            margin-bottom: 6px;
-        }
-
-        .comparison-card .comparison-rating {
-            color: #f39c12;
-            font-size: 0.9rem;
-            margin-bottom: 12px;
-        }
-
-        .comparison-feature-list {
-            font-size: 0.85rem;
-            color: #444;
-            margin-bottom: 12px;
-            padding-left: 18px;
-        }
-
-        .comparison-feature-list li {
-            margin-bottom: 4px;
-        }
-
-        .comparison-pros-cons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            font-size: 0.82rem;
-        }
-
-        .comparison-pros-cons div strong {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        .comparison-pros strong {
-            color: #198754;
-        }
-
-        .comparison-cons strong {
-            color: #dc3545;
-        }
-
-        .comparison-pros-cons ul {
-            padding-left: 16px;
-        }
-
-        .comparison-verdict {
-            margin-top: 24px;
-            padding: 18px 20px;
-            background: #eef1ff;
-            border-left: 4px solid var(--hero-blue);
-            border-radius: 0 10px 10px 0;
-        }
-
-        .comparison-verdict h4 {
-            color: var(--hero-blue);
-            margin-bottom: 6px;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .comparison-verdict p {
-            color: #444;
-            font-size: 0.92rem;
-        }
-
-        @media (max-width: 700px) {
-            .comparison-products-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .comparison-content {
-                padding: 20px;
-            }
-        }
-    </style>
+</style>
 </head>
 
 <body>
@@ -2051,19 +1920,31 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
             </div>
         </div>
     </section>
-
     <!-- Recommendations Modal -->
-    <div id="recommendationsModal">
-        <button id="closeRecommendations">X</button>
+    <div id="recommendationsModal" aria-modal="true" role="dialog">
         
-    <div id="recommendations-content"></div>
-    <button>Ai recomendation</button>   
-</div>
-  <div id="loadingScreen">
-        <div class="loader"></div>
-        <p>Finding products...</p>
+<button id="closeRecommendations" type="button" aria-label="Close recommendations">&times;</button>
+
+        <div id="recommendations-content">
+            
+        </div>
+        <div id="recommendationsActions">
+            <button id="compareProductsBtn" type="button">
+                <i class="fas fa-scale-balanced"></i>
+                Compare 2 Best Products
+            </button>
+        </div>
     </div>
-    <!-- ===== ADDED: AI Comparison Modal ===== -->
+
+    <!-- Full-screen loading overlay: blocks the page while searching -->
+    <div id="loadingScreen" aria-live="polite" aria-busy="true">
+        <div class="loading-card">
+            <div class="loading-spinner"></div>
+            <h3>Finding products...</h3>
+            <p>Please wait a moment.</p>
+        </div>
+    </div>
+<!-- ===== ADDED: AI Comparison Modal ===== -->
     <div id="comparisonModal" class="comparison-modal">
         <div class="comparison-content">
             <span class="close-modal" id="closeComparisonModal">&times;</span>
@@ -2339,202 +2220,238 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
     </div>
 
     <script>
-        // ===================== SUBCATEGORIES & DATA =====================
-
-
-        const products = {
-            'laptops-&-computers': [],
-            'smartphones-&-tablets': [],
-            'tvs-&-home-entertainment': [],
-            'cricket-equipment': [],
-            'fitness-accessories': [],
-            'kitchen-appliances': []
-        };
-
-        const experts = [
-            { name: "Rajesh Sharma", specialty: "Tech & Electronics", rating: 4.8, avatar: "https://randomuser.me/api/portraits/men/32.jpg" },
-            { name: "Priya Patel", specialty: "Fashion & Accessories", rating: 4.9, avatar: "https://randomuser.me/api/portraits/women/44.jpg" },
-            { name: "Amit Kumar", specialty: "Sports Equipment", rating: 4.7, avatar: "https://randomuser.me/api/portraits/men/67.jpg" },
-            { name: "Neha Singh", specialty: "Home & Kitchen", rating: 4.6, avatar: "https://randomuser.me/api/portraits/women/28.jpg" }
-        ];
-
         // ===================== MOBILE MENU =====================
         const mobileMenuBtn = document.getElementById('heroMobileBtn');
         const mainNav = document.getElementById('heroNavLinks');
+        const heroAuth = document.getElementById('heroAuth');
+
         mobileMenuBtn.addEventListener('click', () => {
             mainNav.classList.toggle('mobile-open');
-            document.getElementById('heroAuth').classList.toggle('mobile-open');
+            heroAuth.classList.toggle('mobile-open');
         });
 
         // ===================== BUDGET SLIDER =====================
         const heroBudgetRange = document.getElementById('heroBudgetRange');
         const heroBudgetDisplay = document.getElementById('heroBudgetDisplay');
+
         function updateHeroSlider() {
             const min = Number(heroBudgetRange.min);
             const max = Number(heroBudgetRange.max);
             const val = Number(heroBudgetRange.value);
             const pct = ((val - min) / (max - min)) * 100;
+
             heroBudgetDisplay.textContent = '₹' + val.toLocaleString('en-IN');
-            heroBudgetRange.style.background = `linear-gradient(90deg, #4e66ea 0%, #4e66ea ${pct}%, #d9dce3 ${pct}%, #d9dce3 100%)`;
+            heroBudgetRange.style.background =
+                `linear-gradient(90deg, #4e66ea 0%, #4e66ea ${pct}%, #d9dce3 ${pct}%, #d9dce3 100%)`;
         }
+
         heroBudgetRange.addEventListener('input', updateHeroSlider);
         updateHeroSlider();
 
         // ===================== SELECT PLACEHOLDERS =====================
-        function updateSelectPlaceholder(sel) {
-            if (sel.selectedIndex === 0) sel.classList.add('placeholder');
-            else sel.classList.remove('placeholder');
+        function updateSelectPlaceholder(select) {
+            select.classList.toggle('placeholder', select.selectedIndex === 0);
         }
+
         const heroCategory = document.getElementById('heroCategory');
         const heroSubcategory = document.getElementById('heroSubcategory');
-        [heroCategory, heroSubcategory].forEach(sel => {
-            updateSelectPlaceholder(sel);
-            sel.addEventListener('change', () => updateSelectPlaceholder(sel));
+
+        [heroCategory, heroSubcategory].forEach(select => {
+            updateSelectPlaceholder(select);
+            select.addEventListener('change', () => updateSelectPlaceholder(select));
         });
 
-        // Populate subcategories
+        // ===================== PRODUCT RECOMMENDATIONS =====================
+const recommendationsModal = document.getElementById('recommendationsModal');
+const recommendationsContent = document.getElementById('recommendations-content');
+const loadingScreen = document.getElementById('loadingScreen');
+const heroSubmitBtn = document.getElementById('heroSubmitBtn');
+const compareProductsBtn = document.getElementById('compareProductsBtn');
 
+let latestProducts = [];
+let latestComparison = null;
 
-        // ===================== RECOMMENDATIONS MODAL =====================
-        const recommendationsModal = document.getElementById('recommendationsModal');
-        const aiSuggestion = document.getElementById('aiSuggestion');
-        const productList = document.getElementById('productList');
-        const expertsGrid = document.getElementById('expertsGrid');
-        const uneed = document.getElementById("heroSubcategory");
-        const heroSubmitBtn = document.getElementById('heroSubmitBtn');
-        
-     
-const recommendationsContent =
-    document.querySelector("#recommendations-content");
+function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[char]));
+}
 
-const loadingScreen =
-    document.querySelector("#loadingScreen");
+function getComparisonData(data) {
+    if (!data?.comparison) return null;
+    if (typeof data.comparison === 'object') return data.comparison;
+    try { return JSON.parse(data.comparison); } catch { return null; }
+}
 
 heroSubmitBtn.addEventListener('click', async () => {
-
     const budget = heroBudgetRange.value;
-    const category = heroCategory.value;
-    const query = uneed.value;
+    const search = heroSubcategory.value;
 
-    if (!category) {
-        alert("Please select a category.");
-        return;
+    if (!heroCategory.value) { alert('Please select a category.'); return; }
+    if (!search) { alert('Please select what you need.'); return; }
+
+    loadingScreen.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    heroSubmitBtn.disabled = true;
+
+    try {
+        const response = await fetch('/product', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({search,budget})
+        });
+
+        const data = await response.json();
+        latestProducts = Array.isArray(data.products) ? data.products : [];
+        latestComparison = getComparisonData(data);
+        recommendationsContent.innerHTML = '';
+
+        if (!response.ok || latestProducts.length === 0) {
+            recommendationsContent.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;"><i class="fas fa-box-open" style="font-size:42px;color:#9aa4c7;margin-bottom:16px;"></i><h3 style="margin-bottom:8px;">No products found</h3><p style="color:#6c758d;margin:0;">Try another product or increase your budget.</p></div>`;
+            compareProductsBtn.style.display = 'none';
+        } else {
+            const bestId = Number(latestComparison?.bestProduct?.id);
+            const secondId = Number(latestComparison?.secondBest?.id);
+
+            latestProducts.forEach((product,index) => {
+                const specs = Array.isArray(product.specs) ? product.specs : [];
+                const isBest = index + 1 === bestId;
+                const isSecond = index + 1 === secondId;
+                const card = document.createElement('div');
+                card.className = 'recommendation-card';
+                card.innerHTML = `${isBest ? '<span class="comparison-best-badge"><i class="fas fa-crown"></i> Best Match</span>' : ''}${isSecond ? '<span class="comparison-best-badge"><i class="fas fa-medal"></i> Second Best</span>' : ''}<img src="${escapeHTML(product.image || '')}" alt="${escapeHTML(product.name || 'Product')}" class="product-image" onerror="this.style.display='none'"><h3>${escapeHTML(product.name || 'Product')}</h3><h4>${escapeHTML(product.price || 'Price unavailable')}</h4><ul>${specs.map(spec => `<li>${escapeHTML(spec)}</li>`).join('')}</ul>`;
+                recommendationsContent.appendChild(card);
+            });
+            compareProductsBtn.style.display = latestComparison?.bestProduct && latestComparison?.secondBest ? 'inline-flex' : 'none';
+        }
+        recommendationsModal.style.display = 'block';
+    } catch (error) {
+        console.error('Product request failed:', error);
+        alert('Unable to get product recommendations.');
+    } finally {
+        loadingScreen.style.display = 'none';
+        heroSubmitBtn.disabled = false;
     }
-
-    // OPEN MODAL FIRST
-    
-
-    // SHOW LOADING
-    loadingScreen.style.display = "flex";
-
-    // Give browser time to render loading screen
-    await new Promise(resolve => setTimeout(resolve, 50));
-
-    const response = await fetch("/product", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            search: query,
-            budget: budget
-        })
-    });
-
-    const data = await response.json();
-
-    console.log(data);
-
-    // HIDE LOADING
-    loadingScreen.style.display = "none";
-
-    recommendationsContent.innerHTML = "";
-
-    if (!data.products || data.products.length === 0) {
-        recommendationsContent.innerHTML =
-            "<p>No products found.</p>";
-        return;
-    }
-
-    data.products.forEach(product => {
-
-        const card = document.createElement("div");
-
-        card.className = "recommendation-card";
-
-        card.innerHTML = `
-            <img
-                src="${product.image}"
-                alt="${product.name}"
-                class="product-image"
-            >
-
-            <h3>${product.name}</h3>
-
-            <h4>${product.price}</h4>
-
-            <ul>
-                ${(product.specs || [])
-                    .map(spec => `<li>${spec}</li>`)
-                    .join("")}
-            </ul>
-        `;
-
-        recommendationsContent.appendChild(card);
-    });
-    recommendationsModal.style.display = "block";
 });
 
-        // Close modal
-        document.querySelectorAll('.close-modal').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Only close the modal that contains this close button
-                const parentModal = e.target.closest('.recommendations-modal, .comparison-modal');
-                if (parentModal) parentModal.style.display = 'none';
-            });
-        });
-        window.addEventListener('click', (e) => {
-            if (e.target === recommendationsModal) recommendationsModal.style.display = 'none';
-            if (e.target === comparisonModal) comparisonModal.style.display = 'none';
-        });
+// ===================== COMPARE TWO BEST PRODUCTS =====================
+const comparisonModal = document.getElementById('comparisonModal');
+const comparisonProductsGrid = document.getElementById('comparisonProductsGrid');
+const comparisonSubtitle = document.getElementById('comparisonSubtitle');
+const comparisonVerdictText = document.getElementById('comparisonVerdictText');
+const closeComparisonModal = document.getElementById('closeComparisonModal');
 
-        function generateStars(rating) {
-            let stars = '';
-            const full = Math.floor(rating);
-            const half = rating % 1 >= 0.5;
-            for (let i = 0; i < full; i++) stars += '<i class="fas fa-star"></i>';
-            if (half) stars += '<i class="fas fa-star-half-alt"></i>';
-            for (let i = 0; i < 5 - Math.ceil(rating); i++) stars += '<i class="far fa-star"></i>';
-            return stars;
-        }
+function getProductForComparison(comparisonProduct) {
+    if (!comparisonProduct) return null;
+    const id = Number(comparisonProduct.id);
+    return latestProducts.find((product,index) => index + 1 === id) || null;
+}
 
-        // ===================== CATEGORY CARDS =====================
+function createComparisonCard(comparisonProduct, label, icon) {
+    const product = getProductForComparison(comparisonProduct) || {};
+    const name = product.name || comparisonProduct.name || 'Product';
+    const price = product.price || comparisonProduct.price || 'Price unavailable';
+    const specs = Array.isArray(product.specs) ? product.specs : [];
+    const image = product.image || '';
+    const link = product.link || comparisonProduct.link || '';
+
+    return `<article class="comparison-card"><span class="comparison-best-badge"><i class="fas ${icon}"></i> ${label}</span><div class="comparison-card-image">${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(name)}" onerror="this.style.display='none'">` : '<i class="fas fa-image"></i>'}</div><h3>${escapeHTML(name)}</h3><div class="comparison-price">${escapeHTML(price)}</div><ul class="comparison-feature-list">${specs.slice(0,6).map(spec => `<li>${escapeHTML(spec)}</li>`).join('')}</ul><div class="comparison-reason"><strong>Why this product?</strong><br>${escapeHTML(comparisonProduct.reason || 'No reason provided by AI.')}</div>${link ? `<a class="comparison-product-link" href="${escapeHTML(link)}" target="_blank" rel="noopener">Open Product <i class="fas fa-external-link-alt"></i></a>` : ''}</article>`;
+}
+
+function openProductComparison() {
+    const best = latestComparison?.bestProduct;
+    const second = latestComparison?.secondBest;
+
+    if (!best || !second) {
+        alert('Comparison data is not available from the backend.');
+        return;
+    }
+
+    // Use exactly the Best Product and Second Best returned by the backend.
+    comparisonProductsGrid.innerHTML = createComparisonCard(best, 'Best Product', 'fa-crown') + createComparisonCard(second, 'Second Best', 'fa-medal');
+    comparisonSubtitle.textContent = 'These are the two products selected by the AI from the backend results.';
+    comparisonVerdictText.textContent = `${best.name || 'Best Product'} is ranked #1 because ${best.reason || 'it was selected as the best match.'} ${second.name || 'Second Product'} is ranked #2 because ${second.reason || 'it was selected as the second-best match.'}`;
+
+    comparisonModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+compareProductsBtn.addEventListener('click', openProductComparison);
+
+closeComparisonModal.addEventListener('click', () => {
+    comparisonModal.style.display = 'none';
+    recommendationsModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+});
+
+// ===================== MODAL CLOSE =====================
+const closeRecommendations = document.getElementById('closeRecommendations');
+closeRecommendations.addEventListener('click', () => {
+    recommendationsModal.style.display = 'none';
+    comparisonModal.style.display = 'none';
+    document.body.style.overflow = '';
+});
+
+window.addEventListener('click', event => {
+    if (event.target === recommendationsModal) {
+        recommendationsModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    if (event.target === comparisonModal) {
+        comparisonModal.style.display = 'none';
+        recommendationsModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+});
+
+document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    if (comparisonModal.style.display === 'block') {
+        comparisonModal.style.display = 'none';
+        recommendationsModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    } else if (recommendationsModal.style.display === 'block') {
+        recommendationsModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+});
+
+// ===================== CATEGORY CARDS =====================
         document.querySelectorAll('.category-card').forEach(card => {
             card.addEventListener('click', () => {
-                const category = card.getAttribute('data-category');
-                heroCategory.value = category;
+                heroCategory.value = card.getAttribute('data-category');
                 heroCategory.dispatchEvent(new Event('change'));
-                window.scrollTo({ top: document.querySelector('.hero-section-wrapper').offsetTop, behavior: 'smooth' });
+                window.scrollTo({
+                    top: document.querySelector('.hero-section-wrapper').offsetTop,
+                    behavior: 'smooth'
+                });
             });
         });
 
         // ===================== SMOOTH SCROLL =====================
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                if (this.getAttribute('href') === '#') return;
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) window.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' });
+            anchor.addEventListener('click', function (event) {
+                const href = this.getAttribute('href');
+                if (href === '#') return;
+
+                const target = document.querySelector(href);
+                if (!target) return;
+
+                event.preventDefault();
+                window.scrollTo({
+                    top: target.offsetTop - 20,
+                    behavior: 'smooth'
+                });
             });
         });
 
-        // ===================== AUTH MODAL LOGIC =====================
+        // ===================== AUTH MODAL =====================
         let authModalInstance = null;
 
         function initializeAuthModal() {
-            const modalEl = document.getElementById('authModal');
-            if (modalEl && !authModalInstance) {
-                authModalInstance = new bootstrap.Modal(modalEl);
+            const modal = document.getElementById('authModal');
+            if (modal && !authModalInstance) {
+                authModalInstance = new bootstrap.Modal(modal);
             }
         }
 
@@ -2551,8 +2468,8 @@ heroSubmitBtn.addEventListener('click', async () => {
             document.getElementById('loginForm').classList.add('d-none');
             document.getElementById('signupForm').classList.remove('d-none');
             document.getElementById('modalTitle').textContent = 'Sign Up';
+            toggleSuggestionField();
             authModalInstance.show();
-            toggleSuggestionField(); // Ensure field is hidden on open
         }
 
         function switchToSignup() {
@@ -2568,152 +2485,162 @@ heroSubmitBtn.addEventListener('click', async () => {
             document.getElementById('modalTitle').textContent = 'Login';
         }
 
-        // ===================== NEW: Toggle Suggestion Categories Field =====================
+        // ===================== FORGOT PASSWORD =====================
+        function openForgotPasswordModal() {
+            if (authModalInstance) authModalInstance.hide();
+            const forgotModal = document.getElementById('forgotPasswordModal');
+            bootstrap.Modal.getOrCreateInstance(forgotModal).show();
+        }
+
+        document.getElementById('forgotPasswordForm').addEventListener('submit', async event => {
+            event.preventDefault();
+
+            const email = document.getElementById('forgotEmail').value.trim();
+            if (!email) {
+                alert('Please enter your email address.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/forget', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await response.json();
+                alert(result.message || 'Password reset email sent.');
+
+                if (response.ok) {
+                    event.target.reset();
+                    document.getElementById('successMessage').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Forgot password error:', error);
+                alert('Unable to send password reset email.');
+            }
+        });
+
+        // ===================== SIGNUP INTEREST =====================
         function toggleSuggestionField() {
             const interest = document.getElementById('signupInterest').value;
             const container = document.getElementById('suggestionCategoriesContainer');
-            if (interest === 'giving' || interest === 'both') {
-                container.style.display = 'block';
-            } else {
-                container.style.display = 'none';
-            }
+            container.style.display = (interest === 'giving' || interest === 'both') ? 'block' : 'none';
         }
 
-        // Attach listener to interest select
-        function attachInterestListener() {
-            const interestSelect = document.getElementById('signupInterest');
-            interestSelect.addEventListener('change', toggleSuggestionField);
-        }
+        document.getElementById('signupInterest').addEventListener('change', toggleSuggestionField);
 
-        // ===================== ADDED: FORGOT / RESET PASSWORD LOGIC =====================
-        function openForgotPasswordModal() {
-            if (authModalInstance) authModalInstance.hide();
-            const forgotModalEl = document.getElementById('forgotPasswordModal');
-            const forgotModalInstance = bootstrap.Modal.getOrCreateInstance(forgotModalEl);
-            forgotModalInstance.show();
-        }
-
-        function validateEmail(email) {
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailPattern.test(email);
-        }
-
-        document.getElementById('forgotPasswordForm').addEventListener('submit', function (event) {
+        // ===================== SIGNUP =====================
+        document.getElementById('signupForm').addEventListener('submit', async event => {
             event.preventDefault();
-            const email = document.getElementById('forgotEmail').value.trim();
-            if (!email) { alert('Please enter your email address.'); return; }
-            if (!validateEmail(email)) { alert('Please enter a valid email address.'); return; }
-            document.getElementById('successMessage').style.display = 'block';
-            this.reset();
+
+            const form = event.target;
+            const formData = new FormData(form);
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Password and confirm password are not the same');
+                return;
+            }
+
+            const data = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                password,
+                signupInterest: formData.get('signupInterest'),
+                suggestionCategoriesGroup: formData.get('suggestionCategoriesGroup')
+            };
+
+            try {
+                const response = await fetch('/signin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    alert(result.message || 'Signup failed');
+                    return;
+                }
+
+                alert(result.message || 'Account created successfully!');
+                switchToLogin();
+                document.getElementById('loginEmail').value = data.email;
+                document.getElementById('loginPassword').value = '';
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('Something went wrong while creating your account.');
+            }
         });
 
-        const newPasswordInput = document.getElementById('newPassword');
-        const confirmPasswordInput = document.getElementById('confirmPassword');
-
-        function updateRequirement(id, valid) {
-            const element = document.getElementById(id);
-            const icon = element.querySelector('i');
-            if (valid) {
-                element.classList.remove('invalid');
-                element.classList.add('valid');
-                icon.classList.remove('fa-circle-xmark');
-                icon.classList.add('fa-circle-check');
-            } else {
-                element.classList.remove('valid');
-                element.classList.add('invalid');
-                icon.classList.remove('fa-circle-check');
-                icon.classList.add('fa-circle-xmark');
-            }
-        }
-
-        function checkPasswordRequirements() {
-            const password = newPasswordInput.value;
-            const confirm = confirmPasswordInput.value;
-            updateRequirement('lengthCheck', password.length >= 8);
-            updateRequirement('numberCheck', /\d/.test(password));
-            updateRequirement('matchCheck', password.length > 0 && password === confirm);
-        }
-
-        newPasswordInput.addEventListener('input', checkPasswordRequirements);
-        confirmPasswordInput.addEventListener('input', checkPasswordRequirements);
-
-        document.getElementById('resetPasswordForm').addEventListener('submit', function (event) {
+        // ===================== LOGIN =====================
+        document.getElementById('loginForm').addEventListener('submit', async event => {
             event.preventDefault();
-            const password = newPasswordInput.value;
-            const confirm = confirmPasswordInput.value;
-            if (password.length < 8) { alert('Password must contain at least 8 characters.'); return; }
-            if (!/\d/.test(password)) { alert('Password must contain at least one number.'); return; }
-            if (password !== confirm) { alert('Passwords do not match.'); return; }
-            alert('Password has been reset successfully!');
-            this.reset();
+
+            const formData = new FormData(event.target);
+            const data = {
+                email: formData.get('email'),
+                pass: formData.get('pass')
+            };
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.message === 'Register First') {
+                    alert(result.message);
+                    switchToSignup();
+                } else if (result.message === 'Wrong Password') {
+                    alert(result.message);
+                } else if (result.message === 'logged in') {
+                    alert('Login successful');
+                    showProfile(result.user);
+                    authModalInstance.hide();
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
+            }
         });
 
-        // ===================== ADDED: LOGIN STATE (localStorage) =====================
-        const WISEFIND_USER_KEY = 'wisefindUser';
+        // ===================== PROFILE =====================
+        function showProfile(user) {
+            const username = user.username || user.name || 'User';
+            const email = user.email || '';
+            const initial = username.charAt(0).toUpperCase();
 
-        function saveLoggedInUser(user) {
-            localStorage.setItem(WISEFIND_USER_KEY, JSON.stringify(user));
-        }
-
-        function getLoggedInUser() {
-            const raw = localStorage.getItem(WISEFIND_USER_KEY);
-            return raw ? JSON.parse(raw) : null;
-        }
-
-        function clearLoggedInUser() {
-            localStorage.removeItem(WISEFIND_USER_KEY);
-        }
-
-        function getUserName(user) {
-            return user?.username || user?.name || 'User';
-        }
-
-        function updateProfileDisplay(user) {
-            const username = getUserName(user);
-            const email = user?.email || '';
-
-            document.getElementById('profileInitial').textContent =
-                username.charAt(0).toUpperCase();
-
-            document.getElementById('profileInitialLarge').textContent =
-                username.charAt(0).toUpperCase();
-
+            document.getElementById('guestAuthLinks').style.display = 'none';
+            document.getElementById('heroProfile').style.display = 'flex';
+            document.getElementById('profileInitial').textContent = initial;
+            document.getElementById('profileInitialLarge').textContent = initial;
             document.getElementById('profileName').textContent = username;
             document.getElementById('profileEmail').textContent = email;
             document.getElementById('profileUsername').textContent = username;
             document.getElementById('profileEmailField').textContent = email;
         }
 
-        function openBookmarks() {
-            const bookmarks = JSON.parse(
-                localStorage.getItem('wisefindBookmarks') || '[]'
-            );
+        // Check the real Express session when the page loads.
+        async function loadSession() {
+            try {
+                const response = await fetch('/dashboard', {
+                    credentials: 'include'
+                });
 
-            if (bookmarks.length === 0) {
-                alert("You don't have any bookmarks yet.");
-                return;
-            }
-
-            alert(
-                "Your Bookmarks:\n\n" +
-                bookmarks.map((item, index) =>
-                    `${index + 1}. ${item.name || item}`
-                ).join("\n")
-            );
-        }
-
-        function applyLoginState() {
-            const user = getLoggedInUser();
-            const guestLinks = document.getElementById('guestAuthLinks');
-            const profileArea = document.getElementById('heroProfile');
-
-            if (user) {
-                guestLinks.style.display = 'none';
-                profileArea.style.display = 'flex';
-                updateProfileDisplay(user);
-            } else {
-                guestLinks.style.display = 'flex';
-                profileArea.style.display = 'none';
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.user) showProfile(result.user);
+                }
+            } catch (error) {
+                console.error('Session check failed:', error);
             }
         }
 
@@ -2721,211 +2648,26 @@ heroSubmitBtn.addEventListener('click', async () => {
         const profileBtn = document.getElementById('profileBtn');
         const profileMenu = document.getElementById('profileMenu');
 
-        profileBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+        profileBtn.addEventListener('click', event => {
+            event.stopPropagation();
             profileMenu.classList.toggle('active');
         });
 
-        document.addEventListener('click', (e) => {
-            if (!profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
+        document.addEventListener('click', event => {
+            if (!profileMenu.contains(event.target) && !profileBtn.contains(event.target)) {
                 profileMenu.classList.remove('active');
             }
         });
 
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            clearLoggedInUser();
-            localStorage.removeItem('wisefindBookmarks');
-            window.location.reload();
-        });
-
-        // Delete account
-        document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
-            const user = getLoggedInUser();
-            if (!user) return;
-
-            const username = getUserName(user);
-
-            const confirmed = confirm(
-                `Delete the account "${username}"?\n\n` +
-                `This will remove the saved login profile from this browser.`
-            );
-
-            if (!confirmed) return;
-
-            // Frontend-only cleanup. A backend /delete-account route can be
-            // connected here later for permanent database deletion.
-            clearLoggedInUser();
-            localStorage.removeItem('wisefindBookmarks');
-
-            alert('Your local WiseFind account data has been removed.');
-            window.location.reload();
-        });
-
-        // Initialize everything
-        function initialize() {
-            initializeAuthModal();
-            attachInterestListener();
-            toggleSuggestionField();
-            applyLoginState();
+        // ===================== BOOKMARKS =====================
+        function openBookmarks() {
+            alert('Bookmark functionality is not connected to the backend yet.');
         }
 
-        // Run initialization
-        window.addEventListener('load', initialize);
-
-        // ===================== ADDED: AI COMPARISON (FRONTEND-ONLY) =====================
-        // This section is intentionally isolated from the rest of the app's logic so it
-        // can be swapped out later for a real backend call with minimal changes.
-
-        const comparisonModal = document.getElementById('comparisonModal');
-        const comparisonProductsGrid = document.getElementById('comparisonProductsGrid');
-        const comparisonVerdictText = document.getElementById('comparisonVerdictText');
-        const comparisonSubtitleEl = document.getElementById('comparisonSubtitle');
-
-        /**
-         * openAIComparison()
-         * Entry point wired to the "AI Comparison" button click.
-         * Reads the user's already-selected Budget / Category / Subcategory / Purpose
-         * from the existing finder form, then calls getAIComparison() to obtain the
-         * two products + verdict to render.
-         */
-        function openAIComparison() {
-            const budget = heroBudgetRange.value;
-            const category = heroCategory.options[heroCategory.selectedIndex]
-                ? heroCategory.options[heroCategory.selectedIndex].text
-                : '';
-            const subcategory = heroSubcategory.options[heroSubcategory.selectedIndex]
-                ? heroSubcategory.options[heroSubcategory.selectedIndex].text
-                : '';
-            const purpose = document.getElementById('heroPurpose').value || 'general use';
-
-            const userSelection = {
-                budget: Number(budget),
-                category: category,
-                subcategory: subcategory,
-                purpose: purpose
-            };
-
-            comparisonSubtitleEl.textContent = `Comparing the two best ${subcategory || 'matching'} options for your ₹${userSelection.budget.toLocaleString('en-IN')} budget, based on "${purpose}".`;
-
-            // For now this resolves instantly with placeholder data.
-            // Later this can simply become: await getAIComparison(userSelection)
-            const comparisonData = getAIComparison(userSelection);
-            renderAIComparison(comparisonData);
-
-            comparisonModal.style.display = 'block';
-        }
-
-        /**
-         * getAIComparison(userSelection)
-         * -----------------------------------------------------------------
-         * BACKEND INTEGRATION POINT.
-         * Currently returns hard-coded placeholder/demo data synchronously.
-         *
-         * When the backend is ready, replace the body of this function with
-         * something like:
-         *
-         *   async function getAIComparison(userSelection) {
-         *       const response = await fetch("/api/ai-comparison", {
-         *           method: "POST",
-         *           headers: { "Content-Type": "application/json" },
-         *           body: JSON.stringify(userSelection)
-         *       });
-         *       return await response.json();
-         *   }
-         *
-         * and update openAIComparison() to `await` this call before rendering.
-         * The expected response shape should match the placeholder object below.
-         */
-        function getAIComparison(userSelection) {
-            return {
-                products: [
-                    {
-                        name: 'Demo Product A',
-                        priceLabel: '₹' + Math.round(userSelection.budget * 0.9).toLocaleString('en-IN'),
-                        rating: 4.5,
-                        features: [
-                            'Placeholder feature 1',
-                            'Placeholder feature 2',
-                            'Placeholder feature 3'
-                        ],
-                        pros: [
-                            'Placeholder pro 1',
-                            'Placeholder pro 2'
-                        ],
-                        cons: [
-                            'Placeholder con 1'
-                        ]
-                    },
-                    {
-                        name: 'Demo Product B',
-                        priceLabel: '₹' + Math.round(userSelection.budget * 0.75).toLocaleString('en-IN'),
-                        rating: 4.3,
-                        features: [
-                            'Placeholder feature 1',
-                            'Placeholder feature 2',
-                            'Placeholder feature 3'
-                        ],
-                        pros: [
-                            'Placeholder pro 1',
-                            'Placeholder pro 2'
-                        ],
-                        cons: [
-                            'Placeholder con 1',
-                            'Placeholder con 2'
-                        ]
-                    }
-                ],
-                verdict: 'AI comparison result will appear here.'
-            };
-        }
-
-        /**
-         * renderAIComparison(data)
-         * Pure rendering function — takes the { products, verdict } shape
-         * returned by getAIComparison() (placeholder now, real API later)
-         * and paints it into the comparison modal.
-         */
-        function renderAIComparison(data) {
-            comparisonProductsGrid.innerHTML = '';
-
-            data.products.forEach(product => {
-                const card = document.createElement('div');
-                card.className = 'comparison-card';
-                card.innerHTML = `
-                    <div class="comparison-card-image">
-                        <i class="fas fa-image"></i>
-                    </div>
-                    <h3>${product.name}</h3>
-                    <div class="comparison-price">${product.priceLabel}</div>
-                    <div class="comparison-rating">${generateStars(product.rating)} ${product.rating}</div>
-                    <ul class="comparison-feature-list">
-                        ${product.features.map(f => `<li>${f}</li>`).join('')}
-                    </ul>
-                    <div class="comparison-pros-cons">
-                        <div class="comparison-pros">
-                            <strong>Pros</strong>
-                            <ul>${product.pros.map(p => `<li>${p}</li>`).join('')}</ul>
-                        </div>
-                        <div class="comparison-cons">
-                            <strong>Cons</strong>
-                            <ul>${product.cons.map(c => `<li>${c}</li>`).join('')}</ul>
-                        </div>
-                    </div>
-                `;
-                comparisonProductsGrid.appendChild(card);
-            });
-
-            comparisonVerdictText.textContent = data.verdict;
-        }
-
-        // Wire up the AI Comparison button inside the recommendation modal
-        
-
-        // Close the AI Comparison modal via its own close (X) button
-        document.getElementById('closeComparisonModal').addEventListener('click', () => {
-            comparisonModal.style.display = 'none';
-        });
+        // ===================== INITIALIZE =====================
+        initializeAuthModal();
+        toggleSuggestionField();
+        loadSession();
     </script>
 
     <!-- Bootstrap JS -->
@@ -2933,159 +2675,21 @@ heroSubmitBtn.addEventListener('click', async () => {
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 
-    <!-- Password Eye Toggle (applies to every .password-toggle-icon independently) -->
+    <!-- Password Eye Toggle -->
     <script>
-        document.querySelectorAll('.password-toggle-icon').forEach(function (icon) {
-            icon.addEventListener('click', function () {
-                const input = document.getElementById(icon.getAttribute('data-target'));
+        document.querySelectorAll('.password-toggle-icon').forEach(icon => {
+            icon.addEventListener('click', () => {
+                const input = document.getElementById(icon.dataset.target);
                 if (!input) return;
-                if (input.getAttribute('type') === 'password') {
-                    input.setAttribute('type', 'text');
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
-                } else {
-                    input.setAttribute('type', 'password');
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                }
+
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                icon.classList.toggle('fa-eye', !isPassword);
+                icon.classList.toggle('fa-eye-slash', isPassword);
             });
         });
-
-
-
-
-
-
-        const signupform = document.getElementById("signupForm");
-
-        signupform.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const formdata = new FormData(signupform);
-
-            const password = document.getElementById("signupPassword").value;
-            const confirmpassword = document.getElementById("signupConfirmPassword").value;
-
-            if (password !== confirmpassword) {
-                alert("Password and confirm password are not the same");
-                return;
-            }
-
-            const data = {
-                username: formdata.get("username"),
-                email: formdata.get("email"),
-                password: formdata.get("password"),
-                signupInterest: formdata.get("signupInterest"),
-                suggestionCategoriesGroup: formdata.get("suggestionCategoriesGroup")
-            };
-
-            try {
-                const response = await fetch("/signin", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    alert(result.message || "Signup failed");
-                    return;
-                }
-
-                alert(result.message || "Account created successfully!");
-
-                // Switch from Signup to Login
-                switchToLogin();
-
-                // Automatically put the registered email in the login form
-                document.getElementById("loginEmail").value = data.email;
-
-                // Clear password fields
-                document.getElementById("loginPassword").value = "";
-
-            } catch (error) {
-                console.error("Signup error:", error);
-                alert("Something went wrong while creating your account.");
-            }
-        });
-
-const recommendationsModl =
-    document.getElementById("recommendationsModal");
-
-const closeRecommendations =
-    document.getElementById("closeRecommendations");
-
-closeRecommendations.addEventListener("click", () => {
-    recommendationsModl.style.display = "none";
-});
-        // ===================== MODIFIED: LOGIN now saves user & refreshes on success =====================
-        document.getElementById("loginForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const formdata = new FormData(e.target);
-
-            const data = {
-                email: formdata.get("email"),
-                pass: formdata.get("pass")
-            };
-
-            try {
-                const response = await fetch("/login", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    credentials: "include",
-                    body: JSON.stringify(data)
-                });
-
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    return;
-                }
-
-                const result = await response.json();
-
-                if (result.message === "Register First") {
-                    alert(result.message);
-                    switchToSignup();
-
-                } else if (result.message === "Wrong Password") {
-                    alert(result.message);
-
-                } else if (result.message === "logged in") {
-
-                    alert(result.message);
-
-                    // Save logged-in user
-                    saveLoggedInUser(result.user);
-
-                    // Show profile
-                    updateProfileDisplay(result.user);
-
-                    // Hide Login / Signup
-                    document.getElementById("guestAuthLinks").style.display = "none";
-
-                    // Show Profile
-                    document.getElementById("heroProfile").style.display = "flex";
-                }
-
-
-
-            } catch (err) {
-                console.log(err);
-                alert("Login failed. Please try again.");
-            }
-        });
-
-
-
-
-
     </script>
+
 </body>
 
-</html>
+</html> 

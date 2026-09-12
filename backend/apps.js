@@ -3,7 +3,7 @@ import bcrypt, { hash } from 'bcrypt';
 import session from 'express-session';
 import mongoose from 'mongoose';
 import { signupSchema } from './models.js';
-import { scrap } from "./test_scraper_amazon.js";
+import { scrap } from "./flipcart_scraper.js";
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { hashpasstoken } from './models.js';
@@ -231,6 +231,22 @@ app.post("/product",async (req,res)=>{
   
    return  res.json(result);
 
+});
+
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Logout failed"
+            });
+        }
+
+        res.clearCookie('connect.sid');
+
+        res.json({
+            message: "Logged out successfully"
+        });
+    });
 });
 
 
