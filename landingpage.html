@@ -647,7 +647,10 @@
     overflow-y: auto;
 
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(230px, 250px));
+    justify-content: center;
+    align-content: start;
+    align-items: start;
     gap: 18px;
 }
 
@@ -706,7 +709,9 @@
     scrollbar-width: none;
     padding: 12px;
     width: 250px;
-    height: 470px;
+    height: auto;
+    min-height: 260px;
+    max-height: 470px;
 
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 
@@ -765,6 +770,47 @@
 .recommendation-card li {
     font-size: 12px;
     margin-bottom: 4px;
+}
+
+.recommendation-card li.specs-more {
+    list-style: none;
+    margin-left: -16px;
+    color: #8b93a8;
+    font-style: italic;
+}
+
+/* Rating / discount badges on recommendation cards */
+.recommendation-card .product-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    flex-wrap: wrap;
+}
+
+.recommendation-card .product-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a7f37;
+    background: #eaf7ee;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.recommendation-card .product-rating i {
+    color: #ffc82c;
+}
+
+.recommendation-card .product-discount {
+    font-size: 12px;
+    font-weight: 700;
+    color: #b3261e;
+    background: #fdeceb;
+    padding: 2px 8px;
+    border-radius: 999px;
 }
         .close-modal {
             position: absolute;
@@ -1631,8 +1677,9 @@
         .comparison-subtitle { color:#666; margin:8px 0 24px; font-size:.95rem; }
         .comparison-products-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
         .comparison-card { border:1px solid #eee; border-radius:12px; padding:18px; background:#f8f9fa; }
-        .comparison-card-image { width:100%; height:150px; border-radius:10px; background:#e7e9f5; display:flex; align-items:center; justify-content:center; color:#9aa4c7; font-size:2rem; margin-bottom:14px; overflow:hidden; }
-        .comparison-card-image img { width:100%; height:100%; object-fit:contain; }
+        .comparison-card-image { width:100%; height:180px; border-radius:10px; background:#fff; display:flex; align-items:center; justify-content:center; color:#9aa4c7; font-size:2rem; margin-bottom:14px; overflow:hidden; border:1px solid #eee; }
+        .comparison-card-image img { width:100%; height:100%; object-fit:contain; display:block; padding:8px; }
+        .comparison-image-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#9aa4c7; }
         .comparison-card h3 { font-size:1.05rem; color:#171c26; margin-bottom:6px; }
         .comparison-card .comparison-price { color:var(--hero-blue); font-weight:800; font-size:1.15rem; margin-bottom:8px; }
         .comparison-feature-list { font-size:.85rem; color:#444; margin-bottom:12px; padding-left:18px; }
@@ -1930,8 +1977,8 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
         </div>
         <div id="recommendationsActions">
             <button id="compareProductsBtn" type="button">
-                <i class="fas fa-scale-balanced"></i>
-                Compare 2 Best Products
+                <i class="fas fa-robot"></i>
+                Compare with AI
             </button>
         </div>
     </div>
@@ -2269,7 +2316,9 @@ const heroSubmitBtn = document.getElementById('heroSubmitBtn');
 const compareProductsBtn = document.getElementById('compareProductsBtn');
 
 let latestProducts = [];
-let latestComparison = null;
+let latestAllProducts = [];
+let latestAIRecommendation = '';
+let latestParsedAI = null;
 
 function escapeHTML(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({
@@ -2277,10 +2326,131 @@ function escapeHTML(value) {
     }[char]));
 }
 
-function getComparisonData(data) {
-    if (!data?.comparison) return null;
-    if (typeof data.comparison === 'object') return data.comparison;
-    try { return JSON.parse(data.comparison); } catch { return null; }
+// The scraper (test_scraper.js) returns raw products with a `title` field
+// (not `name`), plus an `ai.recommendation` field that is a plain-text
+// block formatted like:
+//   BEST CHOICE: ... / WHY: ...
+//   ALTERNATIVE: ... / WHY: ...
+//   BUDGET OPTION: ... / WHY: ...
+//   FINAL RECOMMENDATION: ...
+// Parse that text into sections we can render in the comparison modal.
+function parseAIRecommendation(text) {
+    if (!text || typeof text !== 'string') return null;
+
+    const sections = {
+        bestChoice: '', bestWhy: '',
+        alternative: '', altWhy: '',
+        budget: '', budgetWhy: '',
+        final: ''
+    };
+
+    let current = null;
+
+    text.split('\n').forEach(rawLine => {
+        const line = rawLine.trim();
+        if (!line) return;
+        const upper = line.toUpperCase();
+
+        if (upper.startsWith('BEST CHOICE:')) {
+            current = 'bestChoice';
+            sections.bestChoice = line.slice(line.indexOf(':') + 1).trim();
+            return;
+        }
+        if (upper.startsWith('ALTERNATIVE:')) {
+            current = 'alternative';
+            sections.alternative = line.slice(line.indexOf(':') + 1).trim();
+            return;
+        }
+        if (upper.startsWith('BUDGET OPTION:')) {
+            current = 'budget';
+            sections.budget = line.slice(line.indexOf(':') + 1).trim();
+            return;
+        }
+        if (upper.startsWith('FINAL RECOMMENDATION:')) {
+            current = 'final';
+            sections.final = line.slice(line.indexOf(':') + 1).trim();
+            return;
+        }
+        if (upper.startsWith('WHY:')) {
+            const whyText = line.slice(line.indexOf(':') + 1).trim();
+            if (current === 'bestChoice') { current = 'bestWhy'; sections.bestWhy = whyText; }
+            else if (current === 'alternative') { current = 'altWhy'; sections.altWhy = whyText; }
+            else if (current === 'budget') { current = 'budgetWhy'; sections.budgetWhy = whyText; }
+            return;
+        }
+
+        // continuation of whatever section we're currently in
+        if (current && sections[current] !== undefined) {
+            sections[current] = sections[current] ? `${sections[current]} ${line}` : line;
+        }
+    });
+
+    return sections;
+}
+
+// ======================================================
+// NORMALIZE PRODUCT TITLE
+// ======================================================
+function normalizeProductTitle(value) {
+    if (!value) return '';
+
+    return String(value)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+// ======================================================
+// FIND ACTUAL SCRAPED PRODUCT FROM AI PRODUCT NAME
+// ======================================================
+function findProductByTitle(name, products) {
+    if (!name || !Array.isArray(products) || products.length === 0) {
+        return null;
+    }
+
+    const target = normalizeProductTitle(name);
+    if (!target) return null;
+
+    // 1. Exact normalized title
+    let product = products.find(item => {
+        const title = normalizeProductTitle(item.title || item.name);
+        return title === target;
+    });
+
+    if (product) return product;
+
+    // 2. Partial title match
+    product = products.find(item => {
+        const title = normalizeProductTitle(item.title || item.name);
+        return title && (title.includes(target) || target.includes(title));
+    });
+
+    if (product) return product;
+
+    // 3. Match important individual words
+    const targetWords = target.split(' ').filter(word => word.length > 2);
+    let bestProduct = null;
+    let bestScore = 0;
+
+    products.forEach(item => {
+        const title = normalizeProductTitle(item.title || item.name);
+        if (!title) return;
+
+        const titleWords = title.split(' ');
+        let score = 0;
+
+        targetWords.forEach(word => {
+            if (titleWords.includes(word)) score++;
+        });
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestProduct = item;
+        }
+    });
+
+    return bestScore > 0 ? bestProduct : null;
 }
 
 heroSubmitBtn.addEventListener('click', async () => {
@@ -2302,27 +2472,52 @@ heroSubmitBtn.addEventListener('click', async () => {
         });
 
         const data = await response.json();
-        latestProducts = Array.isArray(data.products) ? data.products : [];
-        latestComparison = getComparisonData(data);
+
+        // Products come straight from the scraper (title, price, rating,
+        // discount, image, link, specs).
+        const scrapedProducts = Array.isArray(data.products) ? data.products : [];
+
+        // Keep the FULL list around so the AI comparison modal can still
+        // find a product's image/price/specs even if the AI picked one
+        // of the entries we hide from the main grid below.
+        latestAllProducts = scrapedProducts;
+
+        // Ignore the first two results (usually sponsored/ad placements)
+        // and the last result (least reliable — most likely to be a
+        // leftover carousel/widget entry) when actually displaying cards.
+        latestProducts = scrapedProducts.length > 3
+            ? scrapedProducts.slice(2, -1)
+            : scrapedProducts.slice(2);
+
+        latestAIRecommendation = data.ai?.recommendation || '';
+        latestParsedAI = parseAIRecommendation(latestAIRecommendation);
+
         recommendationsContent.innerHTML = '';
 
         if (!response.ok || latestProducts.length === 0) {
             recommendationsContent.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;"><i class="fas fa-box-open" style="font-size:42px;color:#9aa4c7;margin-bottom:16px;"></i><h3 style="margin-bottom:8px;">No products found</h3><p style="color:#6c758d;margin:0;">Try another product or increase your budget.</p></div>`;
             compareProductsBtn.style.display = 'none';
         } else {
-            const bestId = Number(latestComparison?.bestProduct?.id);
-            const secondId = Number(latestComparison?.secondBest?.id);
+            const bestProduct = latestParsedAI ? findProductByTitle(latestParsedAI.bestChoice, latestAllProducts) : null;
+            const altProduct = latestParsedAI ? findProductByTitle(latestParsedAI.alternative, latestAllProducts) : null;
 
-            latestProducts.forEach((product,index) => {
+            latestProducts.forEach(product => {
+                const name = product.title || product.name || 'Product';
                 const specs = Array.isArray(product.specs) ? product.specs : [];
-                const isBest = index + 1 === bestId;
-                const isSecond = index + 1 === secondId;
+                const isBest = bestProduct && bestProduct === product;
+                const isAlt = !isBest && altProduct && altProduct === product;
+
+                const metaRow = (product.rating || product.discount)
+                    ? `<div class="product-meta-row">${product.rating ? `<span class="product-rating"><i class="fas fa-star"></i> ${escapeHTML(product.rating)}</span>` : ''}${product.discount ? `<span class="product-discount">${escapeHTML(product.discount)}</span>` : ''}</div>`
+                    : '';
+
                 const card = document.createElement('div');
                 card.className = 'recommendation-card';
-                card.innerHTML = `${isBest ? '<span class="comparison-best-badge"><i class="fas fa-crown"></i> Best Match</span>' : ''}${isSecond ? '<span class="comparison-best-badge"><i class="fas fa-medal"></i> Second Best</span>' : ''}<img src="${escapeHTML(product.image || '')}" alt="${escapeHTML(product.name || 'Product')}" class="product-image" onerror="this.style.display='none'"><h3>${escapeHTML(product.name || 'Product')}</h3><h4>${escapeHTML(product.price || 'Price unavailable')}</h4><ul>${specs.map(spec => `<li>${escapeHTML(spec)}</li>`).join('')}</ul>`;
+                card.innerHTML = `${isBest ? '<span class="comparison-best-badge"><i class="fas fa-crown"></i> AI Best Choice</span>' : ''}${isAlt ? '<span class="comparison-best-badge"><i class="fas fa-medal"></i> AI Alternative</span>' : ''}<img src="${escapeHTML(product.image || '')}" alt="${escapeHTML(name)}" class="product-image" onerror="this.style.display='none'"><h3>${escapeHTML(name)}</h3><h4>${escapeHTML(product.price || 'Price unavailable')}</h4>${metaRow}<ul>${specs.slice(0, 5).map(spec => `<li>${escapeHTML(spec)}</li>`).join('')}${specs.length > 5 ? `<li class="specs-more">+${specs.length - 5} more</li>` : ''}</ul>`;
                 recommendationsContent.appendChild(card);
             });
-            compareProductsBtn.style.display = latestComparison?.bestProduct && latestComparison?.secondBest ? 'inline-flex' : 'none';
+
+            compareProductsBtn.style.display = latestAIRecommendation ? 'inline-flex' : 'none';
         }
         recommendationsModal.style.display = 'block';
     } catch (error) {
@@ -2334,55 +2529,172 @@ heroSubmitBtn.addEventListener('click', async () => {
     }
 });
 
-// ===================== COMPARE TWO BEST PRODUCTS =====================
+// ===================== COMPARE PRODUCTS WITH AI =====================
+
 const comparisonModal = document.getElementById('comparisonModal');
 const comparisonProductsGrid = document.getElementById('comparisonProductsGrid');
 const comparisonSubtitle = document.getElementById('comparisonSubtitle');
 const comparisonVerdictText = document.getElementById('comparisonVerdictText');
 const closeComparisonModal = document.getElementById('closeComparisonModal');
 
-function getProductForComparison(comparisonProduct) {
-    if (!comparisonProduct) return null;
-    const id = Number(comparisonProduct.id);
-    return latestProducts.find((product,index) => index + 1 === id) || null;
+closeComparisonModal.addEventListener('click', () => {
+    comparisonModal.style.display = 'none';
+    document.body.style.overflow = '';
+});
+// Get another REAL scraped product if the AI name cannot be matched.
+function getFallbackProduct(usedProducts = []) {
+    const visibleProduct = latestProducts.find(product =>
+        product && product.image && !usedProducts.includes(product)
+    );
+
+    if (visibleProduct) return visibleProduct;
+
+    return latestAllProducts.find(product =>
+        product && product.image && !usedProducts.includes(product)
+    ) || null;
 }
 
-function createComparisonCard(comparisonProduct, label, icon) {
-    const product = getProductForComparison(comparisonProduct) || {};
-    const name = product.name || comparisonProduct.name || 'Product';
-    const price = product.price || comparisonProduct.price || 'Price unavailable';
-    const specs = Array.isArray(product.specs) ? product.specs : [];
-    const image = product.image || '';
-    const link = product.link || comparisonProduct.link || '';
+function createComparisonCard(product, fallbackName, reason, label, icon) {
 
-    return `<article class="comparison-card"><span class="comparison-best-badge"><i class="fas ${icon}"></i> ${label}</span><div class="comparison-card-image">${image ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(name)}" onerror="this.style.display='none'">` : '<i class="fas fa-image"></i>'}</div><h3>${escapeHTML(name)}</h3><div class="comparison-price">${escapeHTML(price)}</div><ul class="comparison-feature-list">${specs.slice(0,6).map(spec => `<li>${escapeHTML(spec)}</li>`).join('')}</ul><div class="comparison-reason"><strong>Why this product?</strong><br>${escapeHTML(comparisonProduct.reason || 'No reason provided by AI.')}</div>${link ? `<a class="comparison-product-link" href="${escapeHTML(link)}" target="_blank" rel="noopener">Open Product <i class="fas fa-external-link-alt"></i></a>` : ''}</article>`;
+    const name = (product && (product.title || product.name)) || fallbackName || 'Product';
+    const price = (product && product.price) || 'Price unavailable';
+    const specs = Array.isArray(product?.specs) ? product.specs : [];
+    const image = product?.image || '';
+    const link = product?.link || '';
+
+    // IMPORTANT: image always comes from the actual scraped product.
+    const imageHTML = image
+        ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(name)}" class="comparison-product-image" loading="eager" referrerpolicy="no-referrer">`
+        : `<div class="comparison-image-placeholder"><i class="fas fa-image"></i></div>`;
+
+    return `
+        <article class="comparison-card">
+            <span class="comparison-best-badge">
+                <i class="fas ${escapeHTML(icon)}"></i> ${escapeHTML(label)}
+            </span>
+
+            <div class="comparison-card-image">
+                ${imageHTML}
+            </div>
+
+            <h3>${escapeHTML(name)}</h3>
+            <div class="comparison-price">${escapeHTML(price)}</div>
+
+            ${specs.length > 0 ? `
+                <ul class="comparison-feature-list">
+                    ${specs.slice(0, 6).map(spec => `<li>${escapeHTML(spec)}</li>`).join('')}
+                </ul>
+            ` : ''}
+
+            <div class="comparison-reason">
+                <strong>Why this product?</strong><br>
+                ${escapeHTML(reason || 'Recommended by AI based on the available product information.')}
+            </div>
+
+            ${link ? `
+                <a class="comparison-product-link" href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">
+                    Open Product <i class="fas fa-external-link-alt"></i>
+                </a>
+            ` : ''}
+        </article>
+    `;
 }
 
 function openProductComparison() {
-    const best = latestComparison?.bestProduct;
-    const second = latestComparison?.secondBest;
 
-    if (!best || !second) {
-        alert('Comparison data is not available from the backend.');
+    if (!latestAIRecommendation || !latestParsedAI || !latestParsedAI.bestChoice) {
+        alert('AI advice is not available for this search.');
         return;
     }
 
-    // Use exactly the Best Product and Second Best returned by the backend.
-    comparisonProductsGrid.innerHTML = createComparisonCard(best, 'Best Product', 'fa-crown') + createComparisonCard(second, 'Second Best', 'fa-medal');
-    comparisonSubtitle.textContent = 'These are the two products selected by the AI from the backend results.';
-    comparisonVerdictText.textContent = `${best.name || 'Best Product'} is ranked #1 because ${best.reason || 'it was selected as the best match.'} ${second.name || 'Second Product'} is ranked #2 because ${second.reason || 'it was selected as the second-best match.'}`;
+    if (!Array.isArray(latestAllProducts) || latestAllProducts.length === 0) {
+        alert('Scraped products are not available.');
+        return;
+    }
+
+    console.log('All scraped products:', latestAllProducts);
+    console.log('AI comparison data:', latestParsedAI);
+
+    let bestProduct = findProductByTitle(latestParsedAI.bestChoice, latestAllProducts);
+    let altProduct = findProductByTitle(latestParsedAI.alternative, latestAllProducts);
+    let budgetProduct = findProductByTitle(latestParsedAI.budget, latestAllProducts);
+
+    const usedProducts = [];
+
+    // BEST CHOICE
+    if (!bestProduct) {
+        bestProduct = getFallbackProduct(usedProducts);
+    }
+    if (bestProduct) usedProducts.push(bestProduct);
+
+    // ALTERNATIVE
+    if (latestParsedAI.alternative) {
+        if (!altProduct || usedProducts.includes(altProduct)) {
+            altProduct = getFallbackProduct(usedProducts);
+        }
+        if (altProduct) usedProducts.push(altProduct);
+    }
+
+    // BUDGET
+    if (latestParsedAI.budget) {
+        if (!budgetProduct || usedProducts.includes(budgetProduct)) {
+            budgetProduct = getFallbackProduct(usedProducts);
+        }
+        if (budgetProduct) usedProducts.push(budgetProduct);
+    }
+
+    console.log('Best scraped product:', bestProduct);
+    console.log('Alternative scraped product:', altProduct);
+    console.log('Budget scraped product:', budgetProduct);
+
+    let cardsHTML = '';
+
+    if (bestProduct) {
+        cardsHTML += createComparisonCard(
+            bestProduct,
+            latestParsedAI.bestChoice,
+            latestParsedAI.bestWhy,
+            'Best Choice',
+            'fa-crown'
+        );
+    }
+
+    if (latestParsedAI.alternative && altProduct) {
+        cardsHTML += createComparisonCard(
+            altProduct,
+            latestParsedAI.alternative,
+            latestParsedAI.altWhy,
+            'Alternative',
+            'fa-medal'
+        );
+    }
+
+    if (latestParsedAI.budget && budgetProduct) {
+        cardsHTML += createComparisonCard(
+            budgetProduct,
+            latestParsedAI.budget,
+            latestParsedAI.budgetWhy,
+            'Budget Option',
+            'fa-piggy-bank'
+        );
+    }
+
+    if (!cardsHTML) {
+        alert('Unable to match AI recommendations with scraped products.');
+        console.error('AI:', latestParsedAI);
+        console.error('Products:', latestAllProducts);
+        return;
+    }
+
+    comparisonProductsGrid.innerHTML = cardsHTML;
+    comparisonSubtitle.textContent = "Here's the AI's advice based on your scraped product results.";
+    comparisonVerdictText.textContent = latestParsedAI.final || 'No final recommendation provided.';
 
     comparisonModal.style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
 
 compareProductsBtn.addEventListener('click', openProductComparison);
-
-closeComparisonModal.addEventListener('click', () => {
-    comparisonModal.style.display = 'none';
-    recommendationsModal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-});
 
 // ===================== MODAL CLOSE =====================
 const closeRecommendations = document.getElementById('closeRecommendations');
@@ -2692,4 +3004,4 @@ document.addEventListener('keydown', event => {
 
 </body>
 
-</html> 
+</html>

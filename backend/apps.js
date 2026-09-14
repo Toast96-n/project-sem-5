@@ -3,7 +3,7 @@ import bcrypt, { hash } from 'bcrypt';
 import session from 'express-session';
 import mongoose from 'mongoose';
 import { signupSchema } from './models.js';
-import { scrap } from "./flipcart_scraper.js";
+import { scraptwo } from "./test_scraper.js";
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { hashpasstoken } from './models.js';
@@ -227,7 +227,7 @@ app.post("/product",async (req,res)=>{
             });
         }
 
-  const result = await scrap(search+" under "+budget);
+  const result = await scraptwo(search+" under "+budget);
   
    return  res.json(result);
 

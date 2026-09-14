@@ -1,7 +1,22 @@
 import { chromium } from "playwright";
+import { GoogleGenAI } from "@google/genai";
 import "dotenv/config";
 
-async function scrap(search) {
+
+// ======================================================
+// GEMINI SETUP
+// ======================================================
+
+const ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY
+});
+
+
+// ======================================================
+// FLIPKART SCRAPER
+// ======================================================
+
+async function scraptwo(search) {
 
     console.log("\n========================================");
     console.log("        WISEFIND SCRAPER STARTED");
@@ -9,9 +24,10 @@ async function scrap(search) {
 
     console.log("Search:", search);
 
-    // --------------------------------------------------
-    // 1. LAUNCH BROWSER
-    // --------------------------------------------------
+
+    // ==================================================
+    // LAUNCH BROWSER
+    // ==================================================
 
     const browser = await chromium.launch({
         headless: true
@@ -22,18 +38,18 @@ async function scrap(search) {
 
     try {
 
-        // --------------------------------------------------
-        // 2. CREATE PAGE
-        // --------------------------------------------------
+        // ==================================================
+        // CREATE PAGE
+        // ==================================================
 
         const page = await browser.newPage();
 
         console.log("New page created");
 
 
-        // --------------------------------------------------
-        // 3. OPEN FLIPKART SEARCH
-        // --------------------------------------------------
+        // ==================================================
+        // OPEN FLIPKART
+        // ==================================================
 
         const url =
             `https://www.flipkart.com/search?q=${encodeURIComponent(search)}`;
@@ -48,9 +64,9 @@ async function scrap(search) {
         console.log("Flipkart page loaded");
 
 
-        // --------------------------------------------------
-        // 4. WAIT FOR PRODUCT CARDS
-        // --------------------------------------------------
+        // ==================================================
+        // WAIT FOR PRODUCT CARDS
+        // ==================================================
 
         await page.waitForSelector("div.lvJbLV", {
             timeout: 30000
@@ -59,231 +75,256 @@ async function scrap(search) {
         console.log("Product cards loaded");
 
 
-        // --------------------------------------------------
-        // 5. SCRAPE PRODUCTS
-        // --------------------------------------------------
+        // ==================================================
+        // SCRAPE PRODUCTS
+        // ==================================================
 
-        const products = await page.locator("div.lvJbLV").evaluateAll(cards => {
+        const products = await page
+            .locator("div.lvJbLV")
+            .evaluateAll(cards => {
 
-            return cards.map(card => {
+                return cards.map(card => {
 
-                // ==========================================
-                // PRODUCT LINK
-                // ==========================================
+                    // ------------------------------------------
+                    // ALL TEXT
+                    // ------------------------------------------
 
-                const linkElement =
-                    card.querySelector('a[href*="/p/"]');
-
-                const link =
-                    linkElement?.href || null;
-
-
-                // ==========================================
-                // IMAGE
-                // ==========================================
-
-                const imageElement =
-                    card.querySelector("img");
-
-                const image =
-                    imageElement?.src ||
-                    imageElement?.getAttribute("src") ||
-                    imageElement?.getAttribute("data-src") ||
-                    null;
+                    const fullText =
+                        card.innerText
+                            ?.split("\n")
+                            .map(text => text.trim())
+                            .filter(Boolean) || [];
 
 
-                // ==========================================
-                // TITLE
-                // ==========================================
+                    // ------------------------------------------
+                    // LINK
+                    // ------------------------------------------
 
-                let title = null;
+                    const linkElement =
+                        card.querySelector('a[href*="/p/"]');
 
-                /*
-                    Try the product link first.
+                    const link =
+                        linkElement?.href || null;
 
-                    Usually the main product name is
-                    somewhere inside the product link.
-                */
 
-                if (linkElement) {
+                    // ------------------------------------------
+                    // IMAGE
+                    // ------------------------------------------
 
-                    const linkText =
-                        linkElement.innerText?.trim();
+                    const imageElement =
+                        card.querySelector("img");
 
-                    if (linkText) {
-                        title = linkText;
+                    const image =
+                        imageElement?.src ||
+                        imageElement?.getAttribute("src") ||
+                        imageElement?.getAttribute("data-src") ||
+                        null;
+
+
+                    // ------------------------------------------
+                    // TITLE
+                    // ------------------------------------------
+
+                    let title = null;
+
+
+                    if (linkElement) {
+
+                        const linkText =
+                            linkElement.innerText?.trim();
+
+                        if (linkText) {
+
+                            title =
+                                linkText
+                                    .replace(/add to compare/gi, "")
+                                    .trim();
+
+                        }
+
                     }
-                }
 
 
-                /*
-                    If link text is not useful,
-                    look for elements containing a title attribute.
-                */
+                    // Fallback title
+                    if (!title) {
 
-                if (!title) {
+                        const titleElement =
+                            card.querySelector("[title]");
 
-                    const titleElement =
-                        card.querySelector("[title]");
+                        if (titleElement) {
 
-                    if (titleElement) {
+                            title =
+                                titleElement
+                                    .getAttribute("title")
+                                    ?.replace(/add to compare/gi, "")
+                                    .trim() || null;
 
-                        title =
-                            titleElement.getAttribute("title")?.trim() ||
-                            null;
+                        }
+
                     }
-                }
 
 
-                // ==========================================
-                // ALL TEXT
-                // ==========================================
+                    // ------------------------------------------
+                    // PRICE
+                    // ------------------------------------------
 
-                const fullText =
-                    card.innerText
-                        ?.split("\n")
-                        .map(text => text.trim())
-                        .filter(Boolean) || [];
+                    let price = null;
 
+                    for (const text of fullText) {
 
-                // ==========================================
-                // PRICE
-                // ==========================================
+                        const priceMatch =
+                            text.match(/₹\s?[\d,]+/);
 
-                let price = null;
+                        if (priceMatch) {
 
-                for (const text of fullText) {
+                            price = priceMatch[0];
 
-                    /*
-                        Matches examples:
+                            break;
 
-                        ₹49,999
-                        ₹1,299
-                        ₹999
-                    */
+                        }
 
-                    const priceMatch =
-                        text.match(/₹\s?[\d,]+/);
-
-                    if (priceMatch) {
-
-                        price = priceMatch[0];
-
-                        break;
                     }
-                }
 
 
-                // ==========================================
-                // RATING
-                // ==========================================
+                    // ------------------------------------------
+                    // RATING
+                    // ------------------------------------------
 
-                let rating = null;
+                    let rating = null;
 
-                for (const text of fullText) {
 
-                    /*
-                        Matches:
+                    // Example:
+                    // 4.3 Ratings & 1,234 Reviews
 
-                        4.5
-                        4.2
-                        3.9
+                    for (const text of fullText) {
 
-                        but avoids things like
-                        128 GB / 2025 etc.
-                    */
+                        const ratingMatch =
+                            text.match(
+                                /\b([0-5](?:\.[0-9])?)\s*(?:Ratings?|Stars?)/i
+                            );
 
-                    const ratingMatch =
-                        text.match(/^([0-5](?:\.[0-9])?)$/);
+                        if (ratingMatch) {
 
-                    if (ratingMatch) {
+                            rating = ratingMatch[1];
 
-                        rating = ratingMatch[1];
+                            break;
 
-                        break;
+                        }
+
                     }
-                }
 
 
-                // ==========================================
-                // DISCOUNT
-                // ==========================================
+                    // Fallback rating
+                    if (!rating) {
 
-                let discount = null;
+                        for (const text of fullText) {
 
-                for (const text of fullText) {
+                            const ratingMatch =
+                                text.match(
+                                    /^([0-5](?:\.[0-9])?)$/
+                                );
 
-                    const discountMatch =
-                        text.match(/(\d+)%\s*off/i);
+                            if (ratingMatch) {
 
-                    if (discountMatch) {
+                                rating = ratingMatch[1];
 
-                        discount =
-                            discountMatch[1] + "% off";
+                                break;
 
-                        break;
+                            }
+
+                        }
+
                     }
-                }
 
 
-                // ==========================================
-                // SPECIFICATIONS
-                // ==========================================
+                    // ------------------------------------------
+                    // DISCOUNT
+                    // ------------------------------------------
 
-                const specs = [];
+                    let discount = null;
 
-                const listItems =
-                    card.querySelectorAll("li");
 
-                listItems.forEach(li => {
+                    for (const text of fullText) {
 
-                    const text =
-                        li.innerText?.trim();
+                        const discountMatch =
+                            text.match(
+                                /(?:^|\s)(\d+)%\s*off/i
+                            );
 
-                    if (text) {
+                        if (discountMatch) {
 
-                        specs.push(text);
+                            discount =
+                                discountMatch[1] + "% off";
+
+                            break;
+
+                        }
+
                     }
+
+
+                    // ------------------------------------------
+                    // SPECIFICATIONS
+                    // ------------------------------------------
+
+                    const specs = [];
+
+                    const listItems =
+                        card.querySelectorAll("li");
+
+
+                    listItems.forEach(li => {
+
+                        const text =
+                            li.innerText?.trim();
+
+                        if (text) {
+
+                            specs.push(text);
+
+                        }
+
+                    });
+
+
+                    // ------------------------------------------
+                    // REMOVE DUPLICATE SPECS
+                    // ------------------------------------------
+
+                    const uniqueSpecs =
+                        [...new Set(specs)];
+
+
+                    // ------------------------------------------
+                    // RETURN PRODUCT
+                    // ------------------------------------------
+
+                    return {
+
+                        title,
+
+                        price,
+
+                        rating,
+
+                        discount,
+
+                        image,
+
+                        link,
+
+                        specs: uniqueSpecs
+
+                    };
+
                 });
-
-
-                // ==========================================
-                // REMOVE DUPLICATE SPECS
-                // ==========================================
-
-                const uniqueSpecs =
-                    [...new Set(specs)];
-
-
-                // ==========================================
-                // RETURN PRODUCT
-                // ==========================================
-
-                return {
-
-                    title,
-
-                    price,
-
-                    rating,
-
-                    discount,
-
-                    image,
-
-                    link,
-
-                    specs: uniqueSpecs
-                };
 
             });
 
-        });
 
-
-        // --------------------------------------------------
-        // 6. REMOVE EMPTY PRODUCTS
-        // --------------------------------------------------
+        // ==================================================
+        // REMOVE EMPTY PRODUCTS
+        // ==================================================
 
         const validProducts =
             products.filter(product => {
@@ -298,13 +339,14 @@ async function scrap(search) {
             });
 
 
-        // --------------------------------------------------
-        // 7. REMOVE DUPLICATES
-        // --------------------------------------------------
+        // ==================================================
+        // REMOVE DUPLICATES
+        // ==================================================
 
         const uniqueProducts = [];
 
         const seenLinks = new Set();
+
 
         for (const product of validProducts) {
 
@@ -312,20 +354,23 @@ async function scrap(search) {
                 product.link &&
                 seenLinks.has(product.link)
             ) {
+
                 continue;
+
             }
+
 
             if (product.link) {
+
                 seenLinks.add(product.link);
+
             }
 
+
             uniqueProducts.push(product);
+
         }
 
-
-        // --------------------------------------------------
-        // 8. PRINT RESULT
-        // --------------------------------------------------
 
         console.log(
             "\nProducts found:",
@@ -333,69 +378,159 @@ async function scrap(search) {
         );
 
 
-        console.log("\n========================================");
-        console.log("              PRODUCTS");
-        console.log("========================================");
+        // ==================================================
+        // PRINT PRODUCTS
+        // ==================================================
 
 
-        uniqueProducts.forEach((product, index) => {
 
-            console.log(`\nProduct ${index + 1}`);
-
-            console.log(
-                "Title:",
-                product.title
-            );
-
-            console.log(
-                "Price:",
-                product.price
-            );
-
-            console.log(
-                "Rating:",
-                product.rating
-            );
-
-            console.log(
-                "Discount:",
-                product.discount
-            );
-
-            console.log(
-                "Image:",
-                product.image
-            );
-
-            console.log(
-                "Link:",
-                product.link
-            );
-
-            console.log("Specs:");
-
-            product.specs.forEach(spec => {
-
-                console.log(
-                    "  -",
-                    spec
-                );
-
-            });
-
-        });
-
+        // ==================================================
+        // GEMINI
+        // ==================================================
 
         console.log("\n========================================");
-        console.log("        SCRAPING COMPLETED");
+        console.log("           GEMINI ANALYSIS");
         console.log("========================================");
+
+        console.log("Sending products to Gemini...");
 
 
         // --------------------------------------------------
-        // 9. RETURN PRODUCTS
+        // SEND ONLY FIRST 20 TO AI
         // --------------------------------------------------
 
-        return uniqueProducts;
+        const productsForAI =
+            uniqueProducts.slice(0, 20);
+
+
+        // --------------------------------------------------
+        // PROMPT
+        // --------------------------------------------------
+
+        const prompt = `
+You are WiseFind, an AI shopping assistant.
+
+User searched for:
+
+"${search}"
+
+Here are products scraped from Flipkart:
+
+${JSON.stringify(productsForAI, null, 2)}
+
+Analyze these products and recommend the best products.
+
+Consider:
+
+- Price
+- Rating
+- Specifications
+- Discount
+- Value for money
+- Relevance to the user's search
+
+IMPORTANT:
+
+Do NOT invent any information.
+
+Only use the information provided in the product data.
+
+Give a concise recommendation.
+
+Return your answer in this format:
+
+BEST CHOICE:
+Product name
+
+WHY:
+Short explanation.
+
+ALTERNATIVE:
+Product name
+
+WHY:
+Short explanation.
+
+BUDGET OPTION:
+Product name
+
+WHY:
+Short explanation.
+
+FINAL RECOMMENDATION:
+Short conclusion.
+`;
+
+
+        // ==================================================
+        // CALL GEMINI
+        // ==================================================
+
+        let recommendation = null;
+
+
+        try {
+
+            const response =
+                await ai.models.generateContent({
+
+                    model: "gemini-3.5-flash-lite",
+
+                    contents: prompt,
+
+                    config: {
+
+                        temperature: 0.3,
+
+                        maxOutputTokens: 1000
+
+                    }
+
+                });
+
+
+            recommendation =
+                response.text;
+
+
+            console.log(
+                "\nGemini response received."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "\nGemini Error:",
+                error
+            );
+
+
+            recommendation =
+                "AI recommendation is currently unavailable.";
+
+        }
+
+
+        // ==================================================
+        // FINAL JSON
+        // ==================================================
+
+        return {
+
+            success: true,
+
+            search: search,
+
+            products: uniqueProducts,
+
+            ai: {
+
+                recommendation: recommendation
+
+            }
+
+        };
 
 
     } catch (error) {
@@ -403,19 +538,37 @@ async function scrap(search) {
         console.error("\nSCRAPER ERROR:");
         console.error(error);
 
-        return [];
 
+        return {
+
+            success: false,
+
+            search: search,
+
+            products: [],
+
+            ai: {
+
+                recommendation: null
+
+            },
+
+            error: error.message
+
+        };
 
     } finally {
 
-        // --------------------------------------------------
-        // 10. CLOSE BROWSER
-        // --------------------------------------------------
+        // ==================================================
+        // CLOSE BROWSER
+        // ==================================================
 
         await browser.close();
 
         console.log("\nBrowser closed");
+
     }
+
 }
 
 
@@ -423,20 +576,6 @@ async function scrap(search) {
 // TEST
 // ======================================================
 
-scrap("dumbells")
 
-    .then(result => {
 
-        console.log("\nFinal result:");
-
-        console.log(
-            JSON.stringify(result, null, 2)
-        );
-
-    })
-
-    .catch(error => {
-
-        console.error(error);
-
-    });
+    export { scraptwo };
