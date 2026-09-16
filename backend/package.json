@@ -20,6 +20,7 @@
     "mongoose": "^9.9.2",
     "mysql2": "^3.22.5",
     "nodemailer": "^10.0.7",
-    "playwright": "^1.62.1"
+    "playwright": "^1.62.1",
+    "socket.io": "^4.8.3"
   }
 }

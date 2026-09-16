@@ -18,11 +18,6 @@ const ai = new GoogleGenAI({
 
 async function scraptwo(search) {
 
-    console.log("\n========================================");
-    console.log("        WISEFIND SCRAPER STARTED");
-    console.log("========================================");
-
-    console.log("Search:", search);
 
 
     // ==================================================
@@ -33,7 +28,7 @@ async function scraptwo(search) {
         headless: true
     });
 
-    console.log("Browser launched");
+   
 
 
     try {
@@ -44,7 +39,7 @@ async function scraptwo(search) {
 
         const page = await browser.newPage();
 
-        console.log("New page created");
+        
 
 
         // ==================================================
@@ -54,14 +49,14 @@ async function scraptwo(search) {
         const url =
             `https://www.flipkart.com/search?q=${encodeURIComponent(search)}`;
 
-        console.log("Opening:", url);
+       
 
         await page.goto(url, {
             waitUntil: "domcontentloaded",
             timeout: 60000
         });
 
-        console.log("Flipkart page loaded");
+      
 
 
         // ==================================================
@@ -72,7 +67,7 @@ async function scraptwo(search) {
             timeout: 30000
         });
 
-        console.log("Product cards loaded");
+       
 
 
         // ==================================================
@@ -372,27 +367,9 @@ async function scraptwo(search) {
         }
 
 
-        console.log(
-            "\nProducts found:",
-            uniqueProducts.length
-        );
+        
 
-
-        // ==================================================
-        // PRINT PRODUCTS
-        // ==================================================
-
-
-
-        // ==================================================
-        // GEMINI
-        // ==================================================
-
-        console.log("\n========================================");
-        console.log("           GEMINI ANALYSIS");
-        console.log("========================================");
-
-        console.log("Sending products to Gemini...");
+        
 
 
         // --------------------------------------------------
@@ -493,9 +470,7 @@ Short conclusion.
                 response.text;
 
 
-            console.log(
-                "\nGemini response received."
-            );
+          
 
 
         } catch (error) {
@@ -565,7 +540,7 @@ Short conclusion.
 
         await browser.close();
 
-        console.log("\nBrowser closed");
+        
 
     }
 

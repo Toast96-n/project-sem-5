@@ -10,9 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <!-- Bootstrap 5.3 CSS -->
+     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
     <style>
         :root {
@@ -51,7 +54,6 @@
             padding: 0 20px;
         }
 
-        /* ===================== HERO SECTION (Dark Theme) ===================== */
         .hero-section-wrapper {
             background: linear-gradient(180deg, #19233c 0%, var(--hero-bg) 100%);
             position: relative;
@@ -1693,6 +1695,85 @@
         .close-modal { position:absolute; top:12px; right:16px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:24px; color:#555; }
         @media (max-width:700px) { .comparison-products-grid{grid-template-columns:1fr;} .comparison-content{margin:20px auto; padding:18px;} }
 
+        /* ===== ADDED: Get Advice button ===== */
+        #getAdviceBtn {
+            border: 0;
+            border-radius: 12px;
+            padding: 13px 20px;
+            background: linear-gradient(135deg, #1a7f37, #2fae57);
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(26, 127, 55, .28);
+            transition: .2s ease;
+        }
+        #getAdviceBtn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(26, 127, 55, .36); }
+
+        /* ===== ADDED: Adviser picker modal ===== */
+        .adviser-modal {
+            display: none; position: fixed; inset: 0; width: 100%; height: 100%; padding: 20px;
+            background: rgba(20, 28, 50, .30); z-index: 3100; overflow-y: auto;
+        }
+        .adviser-modal-content {
+            background: #fff; margin: 60px auto; padding: 24px; border-radius: 14px;
+            width: min(560px, 100%); position: relative; box-shadow: 0 12px 40px rgba(0, 0, 0, .18);
+        }
+        .adviser-list-item {
+            display: flex; align-items: center; gap: 14px; padding: 14px; border: 1px solid #eee;
+            border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: .15s ease;
+        }
+        .adviser-list-item:hover { border-color: #4e66ea; background: #f7f8ff; }
+        .adviser-avatar-sm {
+            width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #526cf5, #713ee8);
+            color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex: 0 0 44px;
+        }
+        .adviser-online-dot {
+            width: 9px; height: 9px; border-radius: 50%; background: #1a7f37; display: inline-block; margin-right: 6px;
+        }
+
+        /* ===== ADDED: Chat modal ===== */
+        .chat-modal {
+            display: none; position: fixed; inset: 0; width: 100%; height: 100%; padding: 20px;
+            background: rgba(20, 28, 50, .30); z-index: 3200; overflow-y: auto;
+        }
+        .chat-modal-content {
+            background: #fff; margin: 40px auto; border-radius: 14px; width: min(480px, 100%);
+            position: relative; box-shadow: 0 12px 40px rgba(0, 0, 0, .18); display: flex; flex-direction: column;
+            height: min(640px, calc(100vh - 80px));
+        }
+        .chat-header { padding: 16px 20px; border-bottom: 1px solid #eee; }
+        .chat-header h3 { font-size: 1.05rem; margin: 0; color: #171c26; }
+        .chat-header p { margin: 2px 0 0; font-size: .8rem; color: #777; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+        .chat-bubble { max-width: 78%; padding: 10px 13px; border-radius: 14px; font-size: .88rem; line-height: 1.4; }
+        .chat-bubble.mine { align-self: flex-end; background: #4e66ea; color: #fff; border-bottom-right-radius: 4px; }
+        .chat-bubble.theirs { align-self: flex-start; background: #f0f1f6; color: #222; border-bottom-left-radius: 4px; }
+        .chat-input-row { display: flex; gap: 10px; padding: 14px 16px; border-top: 1px solid #eee; }
+        .chat-input-row input {
+            flex: 1; border: 1px solid #ddd; border-radius: 10px; padding: 10px 12px; font-family: 'Poppins', sans-serif;
+        }
+        .chat-input-row button {
+            border: 0; border-radius: 10px; padding: 0 16px; background: #4e66ea; color: #fff; font-weight: 700; cursor: pointer;
+        }
+
+        /* ===== ADDED: Admin / Adviser panels ===== */
+        .role-panel { display: none; padding: 60px 0; background: #f8f9fd; }
+        .role-panel .container { max-width: 900px; }
+        .role-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .role-panel-header h2 { font-size: 1.7rem; color: #171c26; }
+        .adviser-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .adviser-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+        .adviser-table th, .adviser-table td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #eee; font-size: .88rem; }
+        .adviser-table th { background: #f0f2fa; font-weight: 700; color: #444; }
+        .status-pill { padding: 3px 10px; border-radius: 999px; font-size: .74rem; font-weight: 700; }
+        .status-pill.online { background: #eaf7ee; color: #1a7f37; }
+        .status-pill.offline { background: #f1f1f4; color: #888; }
+        .small-btn { border: 0; border-radius: 8px; padding: 6px 10px; font-size: .78rem; font-weight: 700; cursor: pointer; margin-right: 6px; }
+        .small-btn.danger { background: #fdeceb; color: #b3261e; }
+        .small-btn.primary { background: #eef1ff; color: #4e66ea; }
+
 </style>
 </head>
 
@@ -1722,8 +1803,10 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
                     </div>
                     <div class="hero-auth" id="heroAuth">
                         <!-- Guest state: shown when no user is logged in -->
-                        <div id="guestAuthLinks" style="display:flex; align-items:center; gap:16px;">
+                        <div id="guestAuthLinks" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
                             <a class="hero-login-link" href="#" onclick="openLoginModal(); return false;">Log In</a>
+                            <a class="hero-login-link" href="/adviser">Adviser Login</a>
+                            <a class="hero-login-link" href="/admin-login">Admin Login</a>
                             <button class="hero-signup-btn" type="button" onclick="openSignupModal()">Sign Up</button>
                         </div>
                         <!-- Logged-in state: Profile dropdown, hidden until login -->
@@ -1780,10 +1863,18 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
                                         <span>My Bookmarks</span>
                                     </button>
 
-                                    <button type="button" class="hero-profile-delete" id="deleteAccountBtn">
+                                    <!-- ADDED: reopen past advice chats -->
+                                    <button type="button" class="hero-profile-action" id="myAdviceBtn"
+                                        onclick="openMyAdviceList()">
+                                        <i class="fas fa-comments"></i>
+                                        <span>My Advice Chats</span>
+                                    </button>
+
+                                    <!--<button type="button" class="hero-profile-delete" id="deleteAccountBtn">
                                         <i class="fas fa-trash-can"></i>
                                         <span>Delete Account</span>
                                     </button>
+                                -->
                                 </div>
 
                                 <button type="button" id="logoutBtn" class="hero-profile-logout">
@@ -1967,6 +2058,55 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
             </div>
         </div>
     </section>
+
+    <!-- ===== ADDED: Admin Panel (shown when role === 'admin') ===== -->
+    <section class="role-panel" id="adminPanel">
+        <div class="container">
+            <div class="role-panel-header">
+                <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
+            </div>
+
+            <h4 style="margin-bottom:10px;">Pending Applications</h4>
+            <p style="color:#777;font-size:.85rem;margin-top:-6px;">
+                People apply to become an adviser through the Sign Up form. Approve or reject them here.
+            </p>
+            <table class="adviser-table" style="margin-bottom:24px;">
+                <thead>
+                    <tr><th>Name</th><th>Email</th><th>Specialty</th><th></th></tr>
+                </thead>
+                <tbody id="pendingAdviserTableBody"></tbody>
+            </table>
+
+            <h4 style="margin-bottom:10px;">All Advisers</h4>
+            <table class="adviser-table">
+                <thead>
+                    <tr><th>Name</th><th>Email</th><th>Specialty</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody id="adviserTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== ADDED: Adviser Panel (shown when role === 'adviser') ===== -->
+    <section class="role-panel" id="adviserPanel">
+        <div class="container">
+            <div class="role-panel-header">
+                <h2><i class="fas fa-headset"></i> Adviser Panel</h2>
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600;">
+                    <input type="checkbox" id="adviserOnlineToggle"> Online
+                </label>
+            </div>
+
+            <h4 style="margin-bottom:10px;">My Conversations</h4>
+            <table class="adviser-table">
+                <thead>
+                    <tr><th>User</th><th>Category</th><th>Budget</th><th>Started</th><th></th></tr>
+                </thead>
+                <tbody id="adviserRequestsBody"></tbody>
+            </table>
+        </div>
+    </section>
+
     <!-- Recommendations Modal -->
     <div id="recommendationsModal" aria-modal="true" role="dialog">
         
@@ -1979,6 +2119,11 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
             <button id="compareProductsBtn" type="button">
                 <i class="fas fa-robot"></i>
                 Compare with AI
+            </button>
+            <!-- ADDED -->
+            <button id="getAdviceBtn" type="button">
+                <i class="fas fa-comments"></i>
+                Get Advice from an Adviser
             </button>
         </div>
     </div>
@@ -2008,6 +2153,32 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
             <div class="comparison-verdict" id="comparisonVerdict">
                 <h4><i class="fas fa-wand-magic-sparkles"></i> AI Verdict</h4>
                 <p id="comparisonVerdictText">AI comparison result will appear here.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ADDED: Adviser picker modal ===== -->
+    <div id="adviserPickerModal" class="adviser-modal">
+        <div class="adviser-modal-content">
+            <span class="close-modal" id="closeAdviserPicker">&times;</span>
+            <h2 style="font-size:1.3rem;margin-bottom:6px;"><i class="fas fa-user-tie"></i> Pick an Adviser</h2>
+            <p style="color:#666;font-size:.9rem;margin-bottom:16px;">All advisers for this category — online advisers reply right away, offline advisers will reply as soon as they sign back in.</p>
+            <div id="adviserPickerList"></div>
+        </div>
+    </div>
+
+    <!-- ===== ADDED: Chat modal ===== -->
+    <div id="chatModal" class="chat-modal">
+        <div class="chat-modal-content">
+            <div class="chat-header">
+                <h3 id="chatHeaderName">Chat</h3>
+                <p id="chatHeaderSub"></p>
+                <span class="close-modal" id="closeChatModal" style="top:12px;right:14px;">&times;</span>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-row">
+                <input type="text" id="chatInput" placeholder="Type a message...">
+                <button id="chatSendBtn" type="button">Send</button>
             </div>
         </div>
     </div>
@@ -2042,6 +2213,9 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
                         <li><a href="#">How It Works</a></li>
                         <li><a href="#">Categories</a></li>
                         <li><a href="#">Contact Us</a></li>
+                        <!-- ADDED -->
+                        <li><a href="/admin-login">Admin Login</a></li>
+                        <li><a href="/adviser">Adviser Login</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -2162,16 +2336,20 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
 
                         <!-- UPDATED: Select dropdown instead of checkboxes -->
                         <div class="mb-4" id="suggestionCategoriesContainer" style="display: none;">
-                            <label class="form-label fw-medium">Select Categories for Giving Suggestions :</label>
+                            <label class="form-label fw-medium">Which category do you want to advise on?</label>
                             <select class="form-control" id="suggestionCategoriesGroup"
                                 name="suggestionCategoriesGroup">
                                 <option value="">Choose one option</option>
-                                <option value="Technology">Technology</option>
-                                <option value="Household Products">Household Products</option>
-                                <option value="Fitness & Health">Fitness &amp; Health</option>
-                                <option value="Beauty & Skincare">Beauty &amp; Skincare</option>
-                                <option value="Food & Beverage">Food &amp; Beverage</option>
+                                <option value="tech">Tech &amp; Electronics</option>
+                                <option value="sports">Sports Equipment</option>
+                                <option value="fitness">Gym &amp; Fitness</option>
+                                <option value="home">Household Products</option>
+                                <option value="outdoor">Outdoor &amp; Recreation</option>
+                                <option value="fashion">Fashion &amp; Accessories</option>
                             </select>
+                            <div class="form-text">
+                                An admin will review and approve your application before you can log in as an adviser.
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold">Create Account</button>
@@ -2267,6 +2445,7 @@ style="width: 80px; height: 80px;" alt="WiseFind Logo"> -->
     </div>
 
     <script>
+         
         // ===================== MOBILE MENU =====================
         const mobileMenuBtn = document.getElementById('heroMobileBtn');
         const mainNav = document.getElementById('heroNavLinks');
@@ -2401,6 +2580,20 @@ function normalizeProductTitle(value) {
         .trim();
 }
 
+
+document.querySelector("#logoutBtn").addEventListener("click", async () => {
+    try {
+        const response = await fetch("/logout", { method: "POST" });
+        if (response.ok) {
+            window.location.href = "/";
+        } else {
+            alert("Logout failed. Please try again.");
+        }
+    } catch (error) {
+        console.error("Error during logout:", error);
+        alert("An error occurred. Please try again.");
+    }
+});
 // ======================================================
 // FIND ACTUAL SCRAPED PRODUCT FROM AI PRODUCT NAME
 // ======================================================
@@ -2714,6 +2907,16 @@ window.addEventListener('click', event => {
         recommendationsModal.style.display = 'block';
         document.body.style.overflow = 'hidden';
     }
+    // ADDED: click-outside for the new modals
+    if (event.target === adviserPickerModal) {
+        adviserPickerModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    if (event.target === document.getElementById('chatModal')) {
+        document.getElementById('chatModal').style.display = 'none';
+        document.body.style.overflow = '';
+        currentRequestId = null;
+    }
 });
 
 document.addEventListener('keydown', event => {
@@ -2864,6 +3067,11 @@ document.addEventListener('keydown', event => {
                 suggestionCategoriesGroup: formData.get('suggestionCategoriesGroup')
             };
 
+            if (data.signupInterest === 'giving' && !data.suggestionCategoriesGroup) {
+                alert('Please choose a category you want to give advice in.');
+                return;
+            }
+
             try {
                 const response = await fetch('/signin', {
                     method: 'POST',
@@ -2916,6 +3124,9 @@ document.addEventListener('keydown', event => {
                 } else if (result.message === 'logged in') {
                     alert('Login successful');
                     showProfile(result.user);
+                    currentRole = result.role;
+                    initializeSocket();
+                    showRolePanel(result.role, result.user); // ADDED
                     authModalInstance.hide();
                 }
             } catch (error) {
@@ -2949,12 +3160,18 @@ document.addEventListener('keydown', event => {
 
                 if (response.ok) {
                     const result = await response.json();
-                    if (result.user) showProfile(result.user);
+                    if (result.user) {
+                        showProfile(result.user);
+                        currentRole = result.role;
+                        initializeSocket();
+                        showRolePanel(result.role, result.user); // ADDED
+                    }
                 }
             } catch (error) {
                 console.error('Session check failed:', error);
             }
         }
+         loadSession();
 
         // ===================== PROFILE DROPDOWN =====================
         const profileBtn = document.getElementById('profileBtn');
@@ -2976,10 +3193,352 @@ document.addEventListener('keydown', event => {
             alert('Bookmark functionality is not connected to the backend yet.');
         }
 
+        /* =====================================================
+           ADDED: SOCKET.IO — one shared connection, session-authenticated
+           ===================================================== */
+        let socket = null;
+        let currentRequestId = null;
+        let currentRole = null;
+
+        function initializeSocket() {
+            if (socket) {
+                socket.disconnect();
+            }
+
+            socket = io({
+                withCredentials: true,
+                autoConnect: true
+            });
+
+            socket.on('connect', () => {
+                console.log('Socket connected:', socket.id);
+                if (currentRequestId) {
+                    socket.emit('join_request', { requestId: currentRequestId });
+                }
+            });
+
+            socket.on('connect_error', error => {
+                console.error('Socket connection error:', error.message);
+            });
+
+            socket.on('chat_history', (messages) => {
+            const box = document.getElementById('chatMessages');
+            box.innerHTML = '';
+            messages.forEach(renderChatMessage);
+            box.scrollTop = box.scrollHeight;
+        });
+
+        socket.on('receive_message', (message) => {
+            if (String(message.requestId) !== String(currentRequestId)) return;
+            renderChatMessage(message);
+            const box = document.getElementById('chatMessages');
+            box.scrollTop = box.scrollHeight;
+        });
+
+        socket.on('advisers_updated', () => {
+            if (adviserPickerModal.style.display === 'block') {
+                loadAdviserPicker();
+            }
+        });
+
+        // A new chat has come in for this adviser — refresh their
+        // list live so they don't need to reload the page to see it.
+        socket.on('new_advice_request', (request) => {
+            if (currentRole !== 'adviser') return;
+            loadAdviserRequests();
+            const label = request.userName ? `${request.userName} (${request.category || 'general'})` : 'a user';
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                new Notification('New chat request', { body: `${label} wants advice.` });
+            } else {
+                console.log('New advice request from', label);
+            }
+        });
+        }
+
+        function renderChatMessage(message) {
+            const box = document.getElementById('chatMessages');
+            const mine = message.senderRole === currentRole;
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble ' + (mine ? 'mine' : 'theirs');
+            bubble.textContent = message.text;
+            box.appendChild(bubble);
+        }
+
+        function openChat(requestId, headerName, headerSub) {
+            currentRequestId = requestId;
+            document.getElementById('chatHeaderName').textContent = headerName;
+            document.getElementById('chatHeaderSub').textContent = headerSub || '';
+            document.getElementById('chatMessages').innerHTML = '';
+            document.getElementById('chatModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            if (!socket || !socket.connected) {
+                initializeSocket();
+                socket.once('connect', () => socket.emit('join_request', { requestId }));
+            } else {
+                socket.emit('join_request', { requestId });
+            }
+        }
+
+        document.getElementById('closeChatModal').addEventListener('click', () => {
+            document.getElementById('chatModal').style.display = 'none';
+            document.body.style.overflow = '';
+            currentRequestId = null;
+        });
+
+        document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+        document.getElementById('chatInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text || !currentRequestId) return;
+            if (!socket || !socket.connected) {
+                alert('Chat connection is not ready. Please try again.');
+                return;
+            }
+            socket.emit('send_message', { requestId: currentRequestId, text });
+            input.value = '';
+        }
+
+        /* =====================================================
+           ADDED: GET ADVICE — adviser picker
+           ===================================================== */
+        const adviserPickerModal = document.getElementById('adviserPickerModal');
+        const adviserPickerList = document.getElementById('adviserPickerList');
+
+        document.getElementById('getAdviceBtn').addEventListener('click', () => {
+            if (!heroCategory.value) {
+                alert('Please select a category first.');
+                return;
+            }
+            loadAdviserPicker();
+            adviserPickerModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        });
+
+        document.getElementById('closeAdviserPicker').addEventListener('click', () => {
+            adviserPickerModal.style.display = 'none';
+            document.body.style.overflow = '';
+        });
+
+        async function loadAdviserPicker() {
+            adviserPickerList.innerHTML = '<p style="color:#888;">Loading advisers...</p>';
+            try {
+                const response = await fetch(`/advisers?category=${encodeURIComponent(heroCategory.value)}`);
+                const data = await response.json();
+                const advisers = data.advisers || [];
+
+                if (advisers.length === 0) {
+                    adviserPickerList.innerHTML = '<p style="color:#888;">No advisers are registered for this category yet. Try again shortly.</p>';
+                    return;
+                }
+
+                adviserPickerList.innerHTML = '';
+                advisers.forEach(adviser => {
+                    const item = document.createElement('div');
+                    item.className = 'adviser-list-item';
+                    const statusLabel = adviser.isOnline ? 'Online' : 'Offline';
+                    const dotStyle = adviser.isOnline ? '' : 'style="background:#bbb;"';
+                    item.innerHTML = `
+                        <div class="adviser-avatar-sm">${escapeHTML(adviser.name.charAt(0).toUpperCase())}</div>
+                        <div style="flex:1;">
+                            <div style="font-weight:700;color:#171c26;">${escapeHTML(adviser.name)}</div>
+                            <div style="font-size:.8rem;color:#777;"><span class="adviser-online-dot" ${dotStyle}></span>${statusLabel} &middot; ${escapeHTML(adviser.specialty)}</div>
+                        </div>
+                    `;
+                    item.addEventListener('click', () => requestAdvice(adviser));
+                    adviserPickerList.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Failed to load advisers:', error);
+                adviserPickerList.innerHTML = '<p style="color:#b3261e;">Could not load advisers.</p>';
+            }
+        }
+
+        async function requestAdvice(adviser) {
+            try {
+                const response = await fetch('/advice/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        adviserId: adviser._id,
+                        category: heroCategory.value,
+                        subcategory: heroSubcategory.value,
+                        budget: heroBudgetRange.value
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.message || 'Please log in as a user first.');
+                    return;
+                }
+
+                adviserPickerModal.style.display = 'none';
+                document.body.style.overflow = '';
+                currentRole = 'user';
+                openChat(data.request._id, adviser.name, adviser.specialty);
+            } catch (error) {
+                console.error('Failed to start advice request:', error);
+                alert('Could not connect to that adviser.');
+            }
+        }
+
+        /* Reopen a past conversation from the profile dropdown */
+        async function openMyAdviceList() {
+            try {
+                const response = await fetch('/advice/mine', { credentials: 'include' });
+                const data = await response.json();
+                const requests = data.requests || [];
+
+                if (requests.length === 0) {
+                    alert('No advice conversations yet.');
+                    return;
+                }
+
+                const latest = requests[0];
+                const adviserName = latest.adviserId ? latest.adviserId.name : 'Adviser';
+                currentRole = 'user';
+                openChat(latest._id, adviserName, latest.category);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        /* =====================================================
+           ADDED: ADMIN PANEL
+           ===================================================== */
+        async function loadAdviserTable() {
+            const response = await fetch('/admin/advisers', { credentials: 'include' });
+            if (!response.ok) return;
+            const data = await response.json();
+            const body = document.getElementById('adviserTableBody');
+            body.innerHTML = '';
+
+            (data.advisers || []).forEach(adviser => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${escapeHTML(adviser.name)}</td>
+                    <td>${escapeHTML(adviser.email)}</td>
+                    <td>${escapeHTML(adviser.specialty)}</td>
+                    <td><span class="status-pill ${adviser.isOnline ? 'online' : 'offline'}">${adviser.isOnline ? 'Online' : 'Offline'}</span></td>
+                    <td><button class="small-btn danger" data-id="${adviser._id}">Remove</button></td>
+                `;
+                row.querySelector('.small-btn.danger').addEventListener('click', async () => {
+                    if (!confirm(`Remove ${adviser.name}?`)) return;
+                    await fetch(`/admin/advisers/${adviser._id}`, { method: 'DELETE', credentials: 'include' });
+                    loadAdviserTable();
+                });
+                body.appendChild(row);
+            });
+        }
+
+        async function loadPendingAdvisers() {
+            const response = await fetch('/admin/advisers/pending', { credentials: 'include' });
+            if (!response.ok) return;
+            const data = await response.json();
+            const body = document.getElementById('pendingAdviserTableBody');
+            body.innerHTML = '';
+
+            const pending = data.advisers || [];
+
+            if (pending.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" style="color:#888;">No pending applications.</td></tr>';
+                return;
+            }
+
+            pending.forEach(adviser => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${escapeHTML(adviser.name)}</td>
+                    <td>${escapeHTML(adviser.email)}</td>
+                    <td>${escapeHTML(adviser.specialty)}</td>
+                    <td>
+                        <button class="small-btn primary" data-action="approve">Approve</button>
+                        <button class="small-btn danger" data-action="reject">Reject</button>
+                    </td>
+                `;
+
+                row.querySelector('[data-action="approve"]').addEventListener('click', async () => {
+                    await fetch(`/admin/advisers/${adviser._id}/approve`, { method: 'PATCH', credentials: 'include' });
+                    loadPendingAdvisers();
+                    loadAdviserTable();
+                });
+
+                row.querySelector('[data-action="reject"]').addEventListener('click', async () => {
+                    if (!confirm(`Reject ${adviser.name}'s application?`)) return;
+                    await fetch(`/admin/advisers/${adviser._id}/reject`, { method: 'PATCH', credentials: 'include' });
+                    loadPendingAdvisers();
+                    loadAdviserTable();
+                });
+
+                body.appendChild(row);
+            });
+        }
+
+        /* =====================================================
+           ADDED: ADVISER PANEL
+           ===================================================== */
+        document.getElementById('adviserOnlineToggle').addEventListener('change', async (e) => {
+            await fetch('/adviser/status', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ isOnline: e.target.checked })
+            });
+        });
+
+        async function loadAdviserRequests() {
+            const response = await fetch('/advice/mine', { credentials: 'include' });
+            if (!response.ok) return;
+            const data = await response.json();
+            const body = document.getElementById('adviserRequestsBody');
+            body.innerHTML = '';
+
+            (data.requests || []).forEach(request => {
+                const row = document.createElement('tr');
+                const userName = request.userId ? request.userId.username : 'User';
+                row.innerHTML = `
+                    <td>${escapeHTML(userName)}</td>
+                    <td>${escapeHTML(request.category || '')}</td>
+                    <td>₹${escapeHTML(String(request.budget || ''))}</td>
+                    <td>${new Date(request.createdAt).toLocaleString()}</td>
+                    <td><button class="small-btn primary">Open Chat</button></td>
+                `;
+                row.querySelector('.small-btn.primary').addEventListener('click', () => {
+                    currentRole = 'adviser';
+                    openChat(request._id, userName, request.category);
+                });
+                body.appendChild(row);
+            });
+        }
+
+        /* =====================================================
+           ADDED: ROLE DETECTION — shows the right panel after
+           any of the three logins, or on page-load session check.
+           ===================================================== */
+        function showRolePanel(role, user) {
+            currentRole = role;
+            document.getElementById('adminPanel').style.display = role === 'admin' ? 'block' : 'none';
+            document.getElementById('adviserPanel').style.display = role === 'adviser' ? 'block' : 'none';
+
+            if (role === 'admin') {
+                loadPendingAdvisers();
+                loadAdviserTable();
+            }
+            if (role === 'adviser') {
+                document.getElementById('adviserOnlineToggle').checked = !!user.isOnline;
+                loadAdviserRequests();
+            }
+        }
+
         // ===================== INITIALIZE =====================
         initializeAuthModal();
         toggleSuggestionField();
-        loadSession();
+        
     </script>
 
     <!-- Bootstrap JS -->
