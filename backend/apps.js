@@ -17,18 +17,23 @@ import {
 import { scraptwo } from "./test_scraper.js";
 
 import nodemailer from 'nodemailer';
-import crypto from 'crypto';
+import crypto, { hash } from 'crypto';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 
+// ======================================================
+// PATH SETUP
+// ======================================================
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 
-
+// ======================================================
+// MONGODB
+// ======================================================
 
 await mongoose.connect(
     'mongodb://localhost:27017/ProductSuggestion'
@@ -37,12 +42,18 @@ await mongoose.connect(
 console.log("MongoDB connected");
 
 
+// ======================================================
+// EXPRESS
+// ======================================================
 
 const app = express();
 
 const port = 4005;
 
 
+// ======================================================
+// BODY PARSER
+// ======================================================
 
 app.use(express.json());
 
@@ -149,27 +160,6 @@ app.post('/signin', async (req, res) => {
             suggestionCategoriesGroup
         } = req.body;
 
-
-        let regexname = /^[A-Za-z ]+$/;
-        let regexemail =  /^[A-Za-z0-9._%+-]+@gmail\.com$/
-        let passregex = /^(?=.*[A-Za-z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/;
-
-
-
-         if(!regexname.test(username)){
-            console.log({message:'the name is not valid'})
-            return res.status(401).json({
-                message:"The Name is Not Valid"
-            });
-        }if(!regexemail.test(email)){
-            return res.status(400).json({
-                message:"The Email is not valid"
-            });
-        }else if(!passregex.test(password)){
-            return res.status(400).json({
-                message:"The password is not valid"
-            });
-        }
 
         if (
             !email ||
@@ -320,6 +310,8 @@ app.post('/signin', async (req, res) => {
 
                 suggestionCategoriesGroup
 
+            },{
+                versionKey:false
             });
 
 
@@ -919,9 +911,11 @@ app.post('/forget', async (req, res) => {
                 exprireAt:
                     new Date(
                         Date.now() +
-                        10 * 60 * 1000
+                        3 * 60 * 1000
                     )
 
+            },{
+                versionKey:false
             });
 
 
@@ -1015,6 +1009,9 @@ app.get('/reset-password', async (req, res) => {
 
             });
 
+            const id = findhash.userId;
+            console.log(id);
+
 
         if (!findhash) {
 
@@ -1056,11 +1053,8 @@ app.get('/reset-password', async (req, res) => {
         });
 
 
-        return res.redirect(
-            '/updatepass'
-        );
-
-
+        
+    res.redirect(`/updatepass?_id=${id}`)
     } catch (error) {
 
         console.log(
@@ -1080,21 +1074,38 @@ app.get('/reset-password', async (req, res) => {
 // ======================================================
 // UPDATE PASSWORD PAGE
 // ======================================================
+app.get('/updatepass' , (req,res)=>{
+     res.sendFile(path.join(__dirname,"resetpass.html"));
+})  
 
-app.get('/updatepass', (req, res) => {
+app.post('/changepass',async(req,res)=>{
+    let{id,pass} = req.body;
+    console.log({pass})
 
-    res.send(`
-        <script>
-            alert("the request is send sucessfully");
-        </script>
-    `);
+            const hash =
+            await bcrypt.hash(pass, 10);
 
-});
 
+    const user = await signupSchema.findOne({_id:id})
+    let update = await signupSchema.updateOne({_id:id},{
+        $set:{
+            password:hash
+        }
+    });
+
+    if(update){
+         res.json({suc:"The Password  is Sucessfully Update"});
+    }else{
+        res.status(401).json({msg:"The Password is Not Update"});
+    }
+    console.log(user)
+   
+})
 
 // ======================================================
 // PRODUCT SCRAPER
-// ======================================================
+// ==========================
+// ============================
 
 app.post("/product", async (req, res) => {
 
